@@ -5,11 +5,7 @@ AI-Driven emotional support and monitoring system
 ## Table of Contents
 
 1. [Installation](#installation)
-2. [Activate Virtual Environment](#activate-virtual-environment)
-3. [Install Packages](#install-packages)
-4. [Usage](#usage)
-5. [Contributing](#contributing)
-6. [License](#license)
+
 
 ---
 
@@ -25,8 +21,8 @@ AI-Driven emotional support and monitoring system
 1. **Clone the repository** (if applicable):
 
    ```bash
-   git clone https://github.com/yourusername/your-repo-name.git
-   cd your-repo-name
+   git clone https://github.com/farid-ramy/AI04-Grad
+   cd AI04-Grad
    ```
 
 2. **Activate Virtual Environment**
