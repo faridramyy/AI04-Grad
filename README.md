@@ -26,6 +26,7 @@ AI-Driven emotional support and monitoring system
    ```
 
 2. **Activate Virtual Environment**
+
    On Windows:
 
    ```bash
@@ -39,6 +40,7 @@ AI-Driven emotional support and monitoring system
    ```
 
 3. **Install Packages**
+
    Once the virtual environment is activated, install the required packages by running:
 
    ```bash
