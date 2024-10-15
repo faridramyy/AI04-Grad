@@ -1,9 +1,0 @@
-prefix=C:/Users/dell/Desktop/graduation project/AI04-Grad/conda_env/Library 
-exec_prefix=${prefix}
-libdir=${exec_prefix}/lib
-includedir=${prefix}/include
-
-Name: OpenSSL
-Description: Secure Sockets Layer and cryptography libraries and tools
-Requires: libssl libcrypto
-Version: 3.0.15 
