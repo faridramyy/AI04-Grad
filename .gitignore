@@ -2,5 +2,8 @@
 /datasets
 /videoformof.ipynb
 /conda_env
+venv/
+env/
+/myenv
 
 
