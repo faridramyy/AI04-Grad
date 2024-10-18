@@ -5,6 +5,7 @@ channels:
   - defaults
 
 dependencies:
+  - python=3.9.13
   - bokeh
   - cartopy
   - colorcet
@@ -24,7 +25,6 @@ dependencies:
   - pandas>=0.24.1
   - param
   - python-snappy
-  - python
   - rasterio
   - requests
   - scikit-image
@@ -38,3 +38,4 @@ dependencies:
   - pytorch
   - torchvision
   - torchaudio
+  - cudatoolkit=11.8 # Ensure the correct version of the CUDA toolkit

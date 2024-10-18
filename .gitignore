@@ -1,6 +1,9 @@
 /venv
 /datasets
-/videoformof.ipynb
 /conda_env
-
-
+*.h5
+*.csv
+ 
+/__pycache__
+/test_env
+/_cuda_p2p
