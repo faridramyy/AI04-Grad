@@ -1,0 +1,2 @@
+Requirement already satisfied: scipy in c:\users\dell\desktop\graduation project\ai04-grad\test_env\lib\site-packages (1.9.3)
+Requirement already satisfied: numpy<1.26.0,>=1.18.5 in c:\users\dell\desktop\graduation project\ai04-grad\test_env\lib\site-packages (from scipy) (1.20.3)
