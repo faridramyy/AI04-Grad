@@ -10,4 +10,5 @@
 /videotrial.ipynb
 /videoRecognition
 /text/results
-
+/multimodel/bert_emotion_checkpoint.pth
+/multimodel/text_embeddings.pkl
