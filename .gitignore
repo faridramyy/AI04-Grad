@@ -12,3 +12,6 @@
 /text/results
 /multimodel/bert_emotion_checkpoint.pth
 /multimodel/text_embeddings.pkl
+/videoRecognition/training_Set
+/videoRecognition/Testing_Set
+/videoRecognition/validation_Set
