@@ -1,5 +1,10 @@
 *
-!*.py
+!/audio
+!/brain
+!/multimodel
+!/text
+!/video
+
 !*.ipynb
 !*.txt
 !*.md
