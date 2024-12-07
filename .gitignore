@@ -3,7 +3,7 @@
 !/multimodel
 !/text
 !/video
-
 !*.ipynb
 !*.txt
 !*.md
+!/brainsignal
