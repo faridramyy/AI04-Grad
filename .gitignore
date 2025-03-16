@@ -1,0 +1,54 @@
+# Ignore macOS system files in all subdirectories
+**/.DS_Store
+**/.AppleDouble
+**/.LSOverride
+
+# Ignore macOS Finder metadata in all subdirectories
+**/.TemporaryItems
+**/.Trashes
+**/.VolumeIcon.icns
+**/.AppleDesktop
+**/.fseventsd
+
+# Ignore Windows system files in all subdirectories
+**/Thumbs.db
+**/ehthumbs.db
+**/Desktop.ini
+**/$RECYCLE.BIN/
+**/System Volume Information/
+
+# Ignore hidden files in all subdirectories (but not in the root)
+**/.*.swp
+**/.*~
+**/.svn
+**/.hg
+**/.git
+**/*.lock
+**/*.log
+**/*.pid
+**/*.seed
+**/*.swo
+**/*.orig
+
+# Ignore Node.js and dependency files in all subdirectories
+**/node_modules/
+**/npm-debug.log
+**/yarn-error.log
+**/yarn-debug.log
+
+# Ignore compiled and binary files in all subdirectories
+**/*.o
+**/*.pyc
+**/*.pyo
+**/*.pyd
+**/*.class
+**/*.out
+**/*.exe
+**/*.so
+
+# Ignore logs in all subdirectories
+**/logs/
+**/*.log
+**/*.log.*
+**/npm-debug.log*
+**/yarn-debug.log*
