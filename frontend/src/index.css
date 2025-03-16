@@ -1,0 +1,98 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap");
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --leva-sizes-rootWidth: 340px;
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+}
+
+.female {
+  background-color: #faaca8;
+  background-image: linear-gradient(19deg, #faaca8 0%, #ddd6f3 100%);
+}
+
+.female .button {
+  pointer-events: auto;
+  background-color: #ec4899;
+  color: white;
+  padding: 1rem;
+  border-radius: 0.375rem;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.female .button:hover {
+  background-color: #95004a;
+}
+
+.female .icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.female .button2 {
+  background-color: #ec4899;
+  color: white;
+  padding: 1rem 2.5rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  border-radius: 0.375rem;
+  transition: background-color 0.2s ease-in-out, opacity 0.2s ease-in-out;
+}
+
+.female .button2:hover {
+  background-color: #db2777;
+}
+
+.female .button2:disabled {
+  cursor: not-allowed;
+  opacity: 0.3;
+}
+
+.male {
+  margin: 0;
+  background-color: #3a7bd5;
+  background-image: linear-gradient(19deg, #3a7bd5 0%, #a8d0e6 100%);
+}
+
+.male .button {
+  pointer-events: auto;
+  background-color: #2563eb;
+  color: white;
+  padding: 1rem;
+  border-radius: 0.375rem;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.male .button:hover {
+  background-color: #1e40af;
+}
+
+.male .icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.male .button2 {
+  background-color: #2563eb;
+  color: white;
+  padding: 1rem 2.5rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  border-radius: 0.375rem;
+  transition: background-color 0.2s ease-in-out, opacity 0.2s ease-in-out;
+}
+
+.male .button2:hover {
+  background-color: #1e40af;
+}
+
+.male .button2:disabled {
+  cursor: not-allowed;
+  opacity: 0.3;
+}

@@ -1,0 +1,48 @@
+# Ignore everything
+**
+
+!.gitignore
+
+# Allow text, audio, video, brain directories
+!text/
+!audio/
+!video/
+!brain/
+
+# Allow these subdirectories
+!text/models/
+!audio/models/
+!video/models/
+!brain/models/
+
+!text/exported_files/
+!audio/exported_files/
+!video/exported_files/
+!brain/exported_files/
+
+# Ignore everything inside theses subdirectories
+text/models/**
+audio/models/**
+video/models/**
+brain/models/**
+
+text/exported_files/**
+audio/exported_files/**
+video/exported_files/**
+brain/exported_files/**
+
+# Allow only Jupyter Notebook files inside models folders
+!text/models/**/*.ipynb
+!audio/models/**/*.ipynb
+!video/models/**/*.ipynb
+!brain/models/**/*.ipynb
+
+# Allow only .h5 and .pkl files inside exported_files folders
+!text/exported_files/**/*.h5
+!text/exported_files/**/*.pkl
+!audio/exported_files/**/*.h5
+!audio/exported_files/**/*.pkl
+!video/exported_files/**/*.h5
+!video/exported_files/**/*.pkl
+!brain/exported_files/**/*.h5
+!brain/exported_files/**/*.pkl
