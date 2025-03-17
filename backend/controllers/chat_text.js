@@ -48,16 +48,6 @@ const lipSyncProcess = async (message) => {
   }
 };
 
-
-
-
-
-
-
-
-
-
-
 export const handleText = async (req, res) => {
   const userMessage = req.body.message;
 

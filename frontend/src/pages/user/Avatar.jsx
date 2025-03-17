@@ -10,7 +10,7 @@ function App() {
       <Loader />
       <Leva hidden/>
       <UI/>
-      <Canvas shadows camera={{ position: [0, 0, 1], fov: 30 }}>
+      <Canvas shadows camera={{ position: [0, 0, 1], fov: 30 }} className="female">
         <Experience />
       </Canvas>
     </>
