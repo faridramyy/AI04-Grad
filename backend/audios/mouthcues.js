@@ -138,7 +138,8 @@ async function generateLipSyncJSON(sentence, audioPath, savePath) {
 
 // **🚀 Run Example**
 const sentence = "hey dear, how was your day";
-const audioPath = "backend\audios\intro_0.json"; // adjust path before running
-const savePath = "backend\audios\lipsync_intro_1.json"; // adjust path before running
+const audioPath = "C:/graduation project folder/AI04-Grad/backend/audios/intro_0.wav"; // Use forward slashes // adjust path before running
+
+const savePath = "C:/graduation project folder/AI04-Grad/backend/audios/lipsync_intro_1.json"; // adjust path before running
 
 generateLipSyncJSON(sentence, audioPath, savePath);
