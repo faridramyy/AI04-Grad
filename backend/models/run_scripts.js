@@ -8,11 +8,16 @@ import ExtractedEmotion from "../models/extracted_emotions.js";
 import SevereCase from "../models/severe_case.js";
 import UserSettings from "./user_settings.js";
 //mongodb+srv://Rina:25102002b@rina.gp6gt.mongodb.net/rina_dataset/
-mongoose.connect("mongodb+srv://Rina:25102002b@rina.gp6gt.mongodb.net/rina_dataset/", {
-        useNewUrlParser: true,
-        useUnifiedTopology: true
-    }).then(() => console.log("MongoDB Connected"))
-    .catch(err => console.log(err));
+mongoose
+  .connect(
+    "mongodb+srv://Rina:25102002b@rina.gp6gt.mongodb.net/rina_dataset/",
+    {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    }
+  )
+  .then(() => console.log("MongoDB Connected"))
+  .catch((err) => console.log(err));
 
 // async function insertDummyAiMessages() {
 //     try {
