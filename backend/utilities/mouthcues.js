@@ -9,7 +9,7 @@ const __filename = fileURLToPath(
 const __dirname = dirname(__filename);
 
 // Adjusted Paths
-const rhubarbBinary = path.join(__dirname, "../bin/rhubarb.exe");
+const rhubarbBinary = path.join(__dirname, "../rhubarb_bin/rhubarb.exe");
 const audioDir = path.join(__dirname, "../audios");
 
 const lipSyncMessage = async(filenameWithoutExt) => {
