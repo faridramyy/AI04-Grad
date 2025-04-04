@@ -1,8 +1,9 @@
 import TherapySession from "../models/therapy_session.js";
-import ExtractedEmotion from "../models/extracted_emotions";
-import GameSession from "../models/game_session";
+import ExtractedEmotion from "../models/extracted_emotions.js";
+import GameSession from "../models/game_session.js";
 import User from "../models/user.js";
-import
+import AI_Message from "../models/ai_messages.js";
+
 /**
  * @route GET /api/therapy-sessions
  * @desc Get all therapy sessions
@@ -10,7 +11,6 @@ import
 export const getAllTherapySessions = async(req, res) => {
     try {
         const sessions = await TherapySession.find()
-            .populate("patient_id")
             .populate("emotion_records")
             .populate("chat_sessions")
             .populate("game_sessions")
@@ -30,11 +30,9 @@ export const getAllTherapySessions = async(req, res) => {
 export const getTherapySessionById = async(req, res) => {
     try {
         const session = await TherapySession.findById(req.params.id)
-            .populate("patient_id")
             .populate("emotion_records")
             .populate("chat_sessions")
             .populate("game_sessions")
-            .populate("challenges_sessions");
         if (!session) return res.status(404).json({ error: "Session not found" });
         res.status(200).json(session);
     } catch (error) {
