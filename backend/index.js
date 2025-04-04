@@ -7,6 +7,8 @@ import mongoose from "mongoose";
 import therapySessionRoutes from "./routes/therapySessionRoutes.js";
 import extractedEmotionRoutes from "./routes/extractedEmotionRoutes.js";
 import gameSessionRoutes from "./routes/gameSessionRoutes.js";
+import userFeedbackRoutes from "./routes/userFeedbackRoutes.js";
+
 
 
 dotenv.config();
@@ -21,6 +23,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/therapy-sessions", therapySessionRoutes);
 app.use("/api/extracted-emotions", extractedEmotionRoutes);
 app.use("/api/game-sessions", gameSessionRoutes);
+app.use("/api/user-feedback", userFeedbackRoutes);
 // databae and server connection
 const PORT = process.env.PORT || 3000;
 const MONGO_URI = "mongodb+srv://Rina:25102002b@rina.gp6gt.mongodb.net/rina_dataset";
