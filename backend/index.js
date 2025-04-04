@@ -5,6 +5,8 @@ import chatRoutes from "./routes/chat.js";
 import userRoutes from "./routes/userRoutes.js";
 import mongoose from "mongoose";
 import therapySessionRoutes from "./routes/therapySessionRoutes.js";
+import extractedEmotionRoutes from "./routes/extractedEmotionRoutes.js";
+
 dotenv.config();
 
 const app = express();
@@ -12,9 +14,10 @@ app.use(express.json());
 app.use(cors());
 
 app.use("/chat", chatRoutes);
+// backend and database crud operations
 app.use("/api/users", userRoutes);
 app.use("/api/therapy-sessions", therapySessionRoutes);
-
+app.use("/api/extracted-emotions", extractedEmotionRoutes);
 
 // databae and server connection
 const PORT = process.env.PORT || 3000;
