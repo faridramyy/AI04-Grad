@@ -9,6 +9,10 @@ import extractedEmotionRoutes from "./routes/extractedEmotionRoutes.js";
 import gameSessionRoutes from "./routes/gameSessionRoutes.js";
 import userFeedbackRoutes from "./routes/userFeedbackRoutes.js";
 import userSettingsRoutes from "./routes/userSettingsRoutes.js";
+import aiMessageRoutes from "./routes/aiMessageRoutes.js";
+import severeCaseRoutes from "./routes/severeCaseRoutes.js";
+
+
 
 
 
@@ -27,6 +31,8 @@ app.use("/api/extracted-emotions", extractedEmotionRoutes);
 app.use("/api/game-sessions", gameSessionRoutes);
 app.use("/api/user-feedback", userFeedbackRoutes);
 app.use("/api/user-settings", userSettingsRoutes);
+app.use("/api/ai-messages", aiMessageRoutes);
+app.use("/api/severe-cases", severeCaseRoutes);
 // databae and server connection
 const PORT = process.env.PORT || 3000;
 const MONGO_URI = "mongodb+srv://Rina:25102002b@rina.gp6gt.mongodb.net/rina_dataset";
