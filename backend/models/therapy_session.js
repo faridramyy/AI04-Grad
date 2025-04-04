@@ -30,7 +30,7 @@ const therapySessionSchema = new mongoose.Schema({
     }, // Nullable
     challenges_sessions: {
         type: [mongoose.Schema.Types.ObjectId],
-        ref: "ChallengeSession",
+        //ref: "ChallengeSession", un comment when we do it 
         default: [],
     }, // Nullable
 });
