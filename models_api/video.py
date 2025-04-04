@@ -38,12 +38,12 @@ def load_video_models():
             "pkl": "EfficientNet-B0.pkl"
         },
         "MobileNet": {
-            "h5": "emotion_recognition_mobilenet_weights.h5",
-            "pkl": "mobilenet_label_encoder.pkl"
+            "h5": "mobilenet.h5",
+            "pkl": "mobilenet.pkl"
         },
         "ResNet": {
-            "h5": "emotion_recognition_resnet_weights.h5",
-            "pkl": "emotion_recognition_resnet_label_encoder.pkl"
+            "h5": "resnet.h5",
+            "pkl": "resnet.pkl"
         }
     }
     
@@ -155,11 +155,9 @@ def predict_video():
             os.remove(filepath)
             
             return jsonify({
-                'status': 'success',
                 'final_prediction': final_prediction,
                 'final_confidence': f"{final_confidence:.2%}",
                 'model_predictions': predictions,
-                'weights_used': model_weights
             })
             
         except Exception as e:
