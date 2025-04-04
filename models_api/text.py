@@ -42,18 +42,23 @@ def load_all_models(data_type):
 @app.route("/predict/text", methods=["POST"])
 def predict():
     try:
+        input_data = request.get_json()
+
+        # Validate if data was sent and contains 'sentence'
+        if not input_data or "sentence" not in input_data:
+            return jsonify({"error": "Missing 'sentence' in request body"}), 400
+
+        sentence = input_data["sentence"]
+
         models_dict = load_all_models("text")
 
-        # define weights based on accuracy 
+        # Define weights based on accuracy
         model_weights = {
             "cnn": 0.35, 
             "cnn_with_resnet": 0.35,
             "crnn": 0.1,
             "rnn": 0.2
         }
-
-        input_data = request.get_json()
-        sentence = input_data["sentence"]
 
         predictions = {}
         weighted_votes = {}
@@ -72,7 +77,7 @@ def predict():
 
             predictions[model_name] = predicted_label
 
-            weight = model_weights.get(model_name, 1)  # Default weight is 1 if not specified
+            weight = model_weights.get(model_name, 1)
             weighted_votes[predicted_label] = weighted_votes.get(predicted_label, 0) + weight
 
         final_prediction = max(weighted_votes, key=weighted_votes.get)
@@ -81,8 +86,9 @@ def predict():
             'predictions': predictions,
             'final_prediction': final_prediction
         })
+
     except Exception as e:
-        return jsonify({"error": str(e)}), 400
+        return jsonify({"error": "Missing 'sentence' in request body"}), 400
 
 
 @app.route("/", methods=["GET"])
@@ -91,4 +97,4 @@ def home():
 
 
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=5001, debug=True)
+    app.run(host="127.0.0.1", port=5002, debug=True)

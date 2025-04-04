@@ -8,6 +8,8 @@
 !audio/
 !video/
 !brain/
+!game/
+!game/**
 
 # Allow these subdirectories
 !text/models/
@@ -42,7 +44,6 @@ brain/exported_files/**
 !text/exported_files/**/*.pkl
 !audio/exported_files/**/*.h5
 !audio/exported_files/**/*.pkl
-!video/exported_files/**/*.h5
-!video/exported_files/**/*.pkl
+!video/exported_files/**/*.pth
 !brain/exported_files/**/*.h5
 !brain/exported_files/**/*.pkl
