@@ -11,9 +11,7 @@ import userFeedbackRoutes from "./routes/userFeedbackRoutes.js";
 import userSettingsRoutes from "./routes/userSettingsRoutes.js";
 import aiMessageRoutes from "./routes/aiMessageRoutes.js";
 import severeCaseRoutes from "./routes/severeCaseRoutes.js";
-
-
-
+import stressScenarioRoutes from "./routes/stressScenarioRoutes.js";
 
 
 
@@ -33,7 +31,8 @@ app.use("/api/user-feedback", userFeedbackRoutes);
 app.use("/api/user-settings", userSettingsRoutes);
 app.use("/api/ai-messages", aiMessageRoutes);
 app.use("/api/severe-cases", severeCaseRoutes);
-// databae and server connection
+app.use("/api/stress-scenarios", stressScenarioRoutes);
+// database and server connection
 const PORT = process.env.PORT || 3000;
 const MONGO_URI = "mongodb+srv://Rina:25102002b@rina.gp6gt.mongodb.net/rina_dataset";
 
