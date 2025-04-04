@@ -12,128 +12,128 @@ CORS(app, origins=["http://localhost:3000"])
 
 
 def load_all_models(data_type):
-    MODELS_DIR = "../models/" + data_type + "/exported_files/"
+    """
+    Load all models and their corresponding label encoders from the specified directory.
+    """
+    MODELS_DIR = f"../models/{data_type}/exported_files/"
     models = {}
 
     for file in os.listdir(MODELS_DIR):
         if file.endswith(".h5"):
             model_name = file.replace(".h5", "")
             model_path = os.path.join(MODELS_DIR, file)
-            label_encoder_path = os.path.join(MODELS_DIR, f"{model_name}_label_encoder.pkl")
+            label_path = os.path.join(MODELS_DIR, f"{model_name}_label_encoder.pkl")
 
-            model = load_model(model_path)
+            try:
+                model = load_model(model_path)
+                with open(label_path, "rb") as f:
+                    label_encoder = pickle.load(f)
 
-            with open(label_encoder_path, "rb") as label_encoder_file:
-                label_encoder = pickle.load(label_encoder_file)
+                models[model_name] = {
+                    "model": model,
+                    "label_encoder": label_encoder
+                }
 
-            models[model_name] = {
-                "model": model,
-                "label_encoder": label_encoder
-            }
+            except Exception as e:
+                print(f"Failed to load {model_name}: {e}")
 
     return models
 
 
+def preprocess_audio(y, sr, model_name):
+    """
+    Preprocess audio according to the model's input requirements.
+    """
+    if model_name == "cnn_CREMA_D":
+        mel = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=128)
+        log_mel = librosa.power_to_db(mel, ref=np.max)
+        log_mel = librosa.util.fix_length(log_mel, size=128, axis=1)
+        log_mel = (log_mel - np.min(log_mel)) / (np.max(log_mel) - np.min(log_mel))
+        return np.expand_dims(log_mel, axis=(0, -1))  # Shape: (1, 128, 128, 1)
+    
+    elif model_name == "cnn":
+        mel = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=24)  # 24 x 32 = 768
+        log_mel = librosa.power_to_db(mel, ref=np.max)
+        log_mel = librosa.util.fix_length(log_mel, size=32, axis=1)  # shape: (24, 32)
+        log_mel = (log_mel - np.min(log_mel)) / (np.max(log_mel) - np.min(log_mel))
+        return np.expand_dims(log_mel.flatten(), axis=0)  # (1, 768)
+
+
+    elif model_name == "lstm_CREMA_D":
+        mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13)
+        return np.expand_dims(mfcc.T, axis=0)  # Shape: (1, T, 13)
+
+    elif model_name == "lstm":
+        mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=1)  # Reduce to 1 feature
+        return np.expand_dims(mfcc.T, axis=0)  # Shape: (1, T, 1)
+
+    return None
+
 @app.route("/predict/audio", methods=["POST"])
 def predict_audio():
+    """
+    Predict emotion from uploaded audio using multiple models.
+    """
     try:
+        # Load all models and encoders
         models_dict = load_all_models("audio")
 
-        # define weights based on accuracy 
+        # Define weights for each model (can be tuned)
         model_weights = {
-            "cnn_CREMA_D": 0.25, 
+            "cnn_CREMA_D": 0.25,
             "cnn": 0.25,
             "lstm_CREMA_D": 0.25,
             "lstm": 0.25
         }
 
+        # Check if audio file is provided
         if 'audio' not in request.files:
             return jsonify({"error": "No audio file provided"}), 400
 
         audio_file = request.files['audio']
-        # Load audio data
         y, sr = sf.read(audio_file)
+
         if y.ndim > 1:
             y = y.mean(axis=1)  # Convert stereo to mono
-
-        # Extract log-mel spectrogram with shape (128, ?) (time may vary)
-        mel_spec = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=128, fmax=8000)
-        log_mel_spec = librosa.power_to_db(mel_spec, ref=np.max)
-
-        # Resize or pad to (128, 128)
-        if log_mel_spec.shape[1] < 128:
-            pad_width = 128 - log_mel_spec.shape[1]
-            log_mel_spec = np.pad(log_mel_spec, ((0, 0), (0, pad_width)), mode='constant')
-        else:
-            log_mel_spec = log_mel_spec[:, :128]
-
-        # Normalize
-        log_mel_spec = (log_mel_spec - np.min(log_mel_spec)) / (np.max(log_mel_spec) - np.min(log_mel_spec))
-
-        # Final shape: (1, 128, 128, 1) -> suitable for Conv2D
-        input_features = np.expand_dims(log_mel_spec, axis=(0, -1))
-            
 
         predictions = {}
         weighted_votes = {}
 
-        for model_name, data in models_dict.items():
-            model = data["model"]
-            label_encoder = data["label_encoder"]
+        # Loop through each model
+        for model_name, components in models_dict.items():
+            model = components["model"]
+            encoder = components["label_encoder"]
 
-            # Detect model input shape
-            expected_shape = model.input_shape  # e.g., (None, 128, 128, 1) or (None, 128, 1)
-
-            if expected_shape == (None, 128, 128, 1):
-                # Prepare log-mel spectrogram for Conv2D
-                mel_spec = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=128, fmax=8000)
-                log_mel_spec = librosa.power_to_db(mel_spec, ref=np.max)
-
-                if log_mel_spec.shape[1] < 128:
-                    pad_width = 128 - log_mel_spec.shape[1]
-                    log_mel_spec = np.pad(log_mel_spec, ((0, 0), (0, pad_width)), mode='constant')
-                else:
-                    log_mel_spec = log_mel_spec[:, :128]
-
-                log_mel_spec = (log_mel_spec - np.min(log_mel_spec)) / (np.max(log_mel_spec) - np.min(log_mel_spec))
-                input_features = np.expand_dims(log_mel_spec, axis=(0, -1))  # (1, 128, 128, 1)
-
-            elif expected_shape == (None, 128, 1):
-                # Prepare MFCC for Conv1D/LSTM
-                mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=1)
-
-                if mfcc.shape[1] < 128:
-                    pad_width = 128 - mfcc.shape[1]
-                    mfcc = np.pad(mfcc, ((0, 0), (0, pad_width)), mode='constant')
-                else:
-                    mfcc = mfcc[:, :128]
-
-                mfcc = mfcc.T  # shape: (128, 1)
-                input_features = np.expand_dims(mfcc, axis=0)  # shape: (1, 128, 1)
-
-            else:
-                predictions[model_name] = "Unsupported input shape"
+            features = preprocess_audio(y, sr, model_name)
+            if features is None:
+                predictions[model_name] = "Preprocessing failed or unsupported format"
                 continue
 
-            prediction = model.predict(input_features)
-            predicted_class = np.argmax(prediction, axis=1)
-            predicted_label = label_encoder.inverse_transform(predicted_class)[0]
+            try:
+                prediction = model.predict(features)
+                class_index = int(np.argmax(prediction, axis=1)[0])
+                label = encoder.inverse_transform(np.array([class_index]))[0]
 
-            predictions[model_name] = predicted_label
+                predictions[model_name] = label
+                weight = model_weights.get(model_name, 1)
+                weighted_votes[label] = weighted_votes.get(label, 0) + weight
 
-            weight = model_weights.get(model_name, 1)
-            weighted_votes[predicted_label] = weighted_votes.get(predicted_label, 0) + weight
+            except Exception as e:
+                predictions[model_name] = f"Prediction error: {str(e)}"
 
+        # Decide final prediction based on weighted voting
+        final_prediction = (
+            max(weighted_votes, key=weighted_votes.get)
+            if weighted_votes else "Unable to determine"
+        )
 
-            final_prediction = max(weighted_votes, key=weighted_votes.get)
+        return jsonify({
+            "predictions": predictions,
+            "final_prediction": final_prediction
+        })
 
-            return jsonify({
-                'predictions': predictions,
-                'final_prediction': final_prediction
-            })
-        
     except Exception as e:
-        return jsonify({"error": str(e)}), 400
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/", methods=["GET"])
