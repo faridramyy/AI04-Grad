@@ -23,10 +23,7 @@ const MONGO_URI = "mongodb+srv://Rina:25102002b@rina.gp6gt.mongodb.net/rina_data
 // Function to connect to MongoDB
 const connectDB = async() => {
     try {
-        await mongoose.connect(MONGO_URI, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        });
+        await mongoose.connect(MONGO_URI);
         console.log("✅ MongoDB Connected Successfully!");
     } catch (err) {
         console.error("❌ MongoDB connection error:", err.message);
