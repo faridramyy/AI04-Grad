@@ -1,173 +1,174 @@
 import os
-import pickle
 import numpy as np
 import cv2
+import torch
+import torch.nn.functional as F
 from flask import Flask, request, jsonify
-from tensorflow.keras.models import load_model
-from tensorflow.keras.preprocessing import image
 from flask_cors import CORS
-from werkzeug.utils import secure_filename
-import tensorflow as tf
-from PIL import Image
+from torchvision import models, transforms
 
 app = Flask(__name__)
 CORS(app, origins=["http://localhost:3000"])
 
-# Configuration
-UPLOAD_FOLDER = 'uploads'
-ALLOWED_EXTENSIONS = {'mp4', 'avi', 'mov', 'flv'}
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# Preprocessing function
-def preprocess_frame(frame, target_size=(224, 224)):
-    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    frame = cv2.resize(frame, target_size)
-    img = Image.fromarray(frame)
-    img_array = image.img_to_array(img)
-    img_array = tf.keras.applications.efficientnet.preprocess_input(img_array)
-    return img_array
+# Define your emotion classes manually (must match training order)
+EMOTION_CLASSES = ['angry', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
 
-def load_video_models():
-    MODELS_DIR = "../models/video/exported_files/"
-    models = {}
-    
-    model_files = {
-        "EfficientNet-B0": {
-            "h5": "EfficientNet-B0.h5",
-            "pkl": "EfficientNet-B0.pkl"
-        },
-        "MobileNet": {
-            "h5": "mobilenet.h5",
-            "pkl": "mobilenet.pkl"
-        },
-        "ResNet": {
-            "h5": "resnet.h5",
-            "pkl": "resnet.pkl"
-        }
-    }
-    
-    for model_name, files in model_files.items():
-        h5_path = os.path.join(MODELS_DIR, files["h5"])
-        pkl_path = os.path.join(MODELS_DIR, files["pkl"])
-        
-        if os.path.exists(h5_path) and os.path.exists(pkl_path):
+
+def get_model_architecture(name, num_classes):
+    if name == "resnet_model":
+        model = models.resnet50(pretrained=False)  # ← CHANGED from resnet18
+        model.fc = torch.nn.Linear(model.fc.in_features, num_classes)
+    elif name == "mobilenet_model":
+        model = models.mobilenet_v2(pretrained=False)
+        model.classifier[1] = torch.nn.Linear(model.classifier[1].in_features, num_classes)
+    elif name == "efficientnet_model":
+        model = models.efficientnet_b0(pretrained=False)
+        model.classifier[1] = torch.nn.Linear(model.classifier[1].in_features, num_classes)
+    else:
+        raise ValueError(f"Unsupported model: {name}")
+    return model
+
+def load_all_models(data_type):
+    MODELS_DIR = f"../models/{data_type}/exported_files/"
+    models_dict = {}
+
+    print("Loading models from:", MODELS_DIR)
+    print("Files found:", os.listdir(MODELS_DIR))
+
+    for file in os.listdir(MODELS_DIR):
+        if file.endswith(".pth"):
+            model_name = file.replace(".pth", "")
+            model_path = os.path.join(MODELS_DIR, file)
+
             try:
-                model = load_model(h5_path)
-                with open(pkl_path, "rb") as f:
-                    label_encoder = pickle.load(f)
-                models[model_name] = {
-                    "model": model,
-                    "label_encoder": label_encoder
-                }
-                print(f"✅ Successfully loaded {model_name}")
+                print(f"\n--- Loading {model_name} ---")
+                num_classes = len(EMOTION_CLASSES)
+                model = get_model_architecture(model_name, num_classes)
+                state_dict = torch.load(model_path, map_location=device)
+                model.load_state_dict(state_dict)
+                model.to(device).eval()
+
+                models_dict[model_name] = {"model": model}
+                print(f"{model_name} loaded successfully ✅")
             except Exception as e:
-                print(f"❌ Error loading {model_name}: {str(e)}")
-        else:
-            print(f"⚠️ Files not found for {model_name}")
-    
-    return models
+                print(f"❌ Failed to load {model_name}: {e}")
 
-video_models = load_video_models()
+    return models_dict
 
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-def extract_key_frames(video_path, num_frames=16):
-    cap = cv2.VideoCapture(video_path)
-    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    frame_indices = np.linspace(0, total_frames - 1, num=min(num_frames, total_frames), dtype=int)
-    
-    frames = []
-    for idx in frame_indices:
-        cap.set(cv2.CAP_PROP_POS_FRAMES, idx)
-        ret, frame = cap.read()
-        if ret:
-            frames.append(frame)
-    cap.release()
-    return frames
+def preprocess_video(file_stream):
+    try:
+        temp_path = "temp_video.mp4"
+        with open(temp_path, 'wb') as f:
+            f.write(file_stream.read())
 
-@app.route('/predict/video', methods=['POST'])
+        cap = cv2.VideoCapture(temp_path)
+        frames = []
+        max_frames = 30
+
+        transform = transforms.Compose([
+            transforms.ToPILImage(),
+            transforms.Resize((224, 224)),
+            transforms.ToTensor(),
+            transforms.Normalize([0.485, 0.456, 0.406],
+                                 [0.229, 0.224, 0.225])
+        ])
+
+        frame_count = 0
+        while cap.isOpened() and frame_count < max_frames:
+            ret, frame = cap.read()
+            if not ret:
+                break
+
+            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            tensor_frame = transform(frame_rgb)
+            frames.append(tensor_frame)
+            frame_count += 1
+
+        cap.release()
+        os.remove(temp_path)
+
+        if not frames:
+            print("⚠️ No frames extracted from video")
+            return None
+
+        video_tensor = torch.stack(frames)  # (T, C, H, W)
+        averaged_tensor = video_tensor.mean(dim=0, keepdim=True)  # (1, C, H, W)
+
+        print(f"Preprocessed video shape: {averaged_tensor.shape}")
+        return averaged_tensor.to(device)
+
+    except Exception as e:
+        print(f"❌ Video preprocessing failed: {e}")
+        return None
+
+
+@app.route("/predict/video", methods=["POST"])
 def predict_video():
-    if 'file' not in request.files:
-        return jsonify({'error': 'No file uploaded'}), 400
-    
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({'error': 'Empty filename'}), 400
-    
-    if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(filepath)
-        
-        try:
-            # Model weights based on test accuracies:
-            # EfficientNet: 98.31%, ResNet: 97.08%, MobileNet: 84.66%
-            model_weights = {
-                "EfficientNet-B0": 0.40,  # Highest weight (best accuracy)
-                "ResNet": 0.35,           # Second-best
-                "MobileNet": 0.25         # Lower weight but still contributes
-            }
-            
-            frames = extract_key_frames(filepath)
-            if not frames:
-                return jsonify({'error': 'No frames extracted'}), 400
-            
-            processed_frames = [preprocess_frame(frame) for frame in frames]
-            frames_array = np.array(processed_frames)
-            
-            predictions = {}
-            weighted_votes = {}
-            
-            for model_name, data in video_models.items():
-                model = data['model']
-                label_encoder = data['label_encoder']
-                
-                frame_predictions = []
-                for frame in frames_array:
-                    frame = np.expand_dims(frame, axis=0)
-                    pred = model.predict(frame)
-                    pred_class = np.argmax(pred, axis=1)
-                    pred_label = label_encoder.inverse_transform(pred_class)[0]
-                    frame_predictions.append(pred_label)
-                
-                unique, counts = np.unique(frame_predictions, return_counts=True)
-                model_prediction = unique[np.argmax(counts)]
-                confidence = max(counts) / len(frame_predictions)
-                
-                predictions[model_name] = {
-                    'prediction': model_prediction,
-                    'confidence': f"{confidence:.2%}",
-                    'frame_predictions': frame_predictions
-                }
-                
-                weight = model_weights.get(model_name, 0)
-                weighted_votes[model_prediction] = weighted_votes.get(model_prediction, 0) + weight
-            
-            if weighted_votes:
-                final_prediction = max(weighted_votes.items(), key=lambda x: x[1])[0]
-                final_confidence = max(weighted_votes.values()) / sum(weighted_votes.values())
-            else:
-                final_prediction = "unknown"
-                final_confidence = 0.0
-            
-            os.remove(filepath)
-            
-            return jsonify({
-                'final_prediction': final_prediction,
-                'final_confidence': f"{final_confidence:.2%}",
-                'model_predictions': predictions,
-            })
-            
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
-    
-    return jsonify({'error': 'Invalid file type'}), 400
+    try:
+        models_dict = load_all_models("video")
+
+        model_weights = {
+            "efficientnet_model": 0.4,
+            "resnet_model": 0.3,
+            "mobilenet_model": 0.5
+        }
+
+        if 'video' not in request.files:
+            return jsonify({"error": "No video file provided"}), 400
+
+        video_file = request.files['video']
+        predictions = {}
+        weighted_votes = {}
+
+        for model_name, components in models_dict.items():
+            model = components["model"]
+
+            video_file.seek(0)  # Reset file pointer
+            input_tensor = preprocess_video(video_file)
+            if input_tensor is None:
+                predictions[model_name] = "Preprocessing failed"
+                continue
+
+            try:
+                with torch.no_grad():
+                    output = model(input_tensor)
+                    probs = F.softmax(output, dim=1)
+                    class_index = torch.argmax(probs, dim=1).item()
+                    label = EMOTION_CLASSES[class_index]
+
+                    predictions[model_name] = label
+                    weight = model_weights.get(model_name, 1)
+                    weighted_votes[label] = weighted_votes.get(label, 0) + weight
+
+                    print(f"{model_name} predicted: {label} ✅")
+
+            except Exception as e:
+                print(f"❌ Prediction error for {model_name}: {e}")
+                predictions[model_name] = f"Prediction error: {str(e)}"
+
+        final_prediction = (
+            max(weighted_votes, key=weighted_votes.get)
+            if weighted_votes else "Unable to determine"
+        )
+
+        print(f"\n🧠 Final prediction: {final_prediction}")
+        return jsonify({
+            "predictions": predictions,
+            "final_prediction": final_prediction
+        })
+
+    except Exception as e:
+        print(f"❌ Server error: {e}")
+        return jsonify({"error": str(e)}), 500
+
 
 @app.route("/", methods=["GET"])
 def home():
-    return "🎥 Video Emotion Recognition API"
+    return "🎥 Video Emotion Server is running (no label encoders needed)"
+
 
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=5002, debug=True)
+    app.run(host="127.0.0.1", port=5003, debug=True)
