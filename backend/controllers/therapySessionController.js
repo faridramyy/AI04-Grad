@@ -3,7 +3,7 @@ import ExtractedEmotion from "../models/extracted_emotions.js";
 import GameSession from "../models/game_session.js";
 import User from "../models/user.js";
 import AI_Message from "../models/ai_messages.js";
-
+import jwt from "jsonwebtoken";
 /**
  * @route GET /api/therapy-sessions
  * @desc Get all therapy sessions
@@ -118,7 +118,17 @@ export const createTherapySession = async(req, res) => {
     }
 };
 
+function parseCookies(cookieHeader) {
+    const cookies = {};
+    if (!cookieHeader) return cookies;
 
+    cookieHeader.split(";").forEach((cookie) => {
+        const [name, ...rest] = cookie.trim().split("=");
+        cookies[name] = decodeURIComponent(rest.join("="));
+    });
+
+    return cookies;
+}
 
 
 
@@ -150,12 +160,46 @@ export const updateTherapySession = async(req, res) => {
  * @route DELETE /api/therapy-sessions/:id
  * @desc Delete therapy session
  */
+
+
 export const deleteTherapySession = async(req, res) => {
     try {
-        const deleted = await TherapySession.findByIdAndDelete(req.params.id);
-        if (!deleted) return res.status(404).json({ error: "Not found" });
-        res.status(200).json({ message: "Deleted" });
+        // 🔐 Extract token from cookies
+        const cookies = parseCookies(req.headers.cookie);
+        const token = cookies.token;
+
+        if (!token) {
+            return res.status(401).json({ error: "No token provided" });
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const userId = decoded.userId;
+        console.log(decoded);
+
+        const sessionId = req.params.id;
+
+        // ✅ Check if session exists
+        const session = await TherapySession.findById(sessionId);
+        console.log(session);
+        if (!session) {
+            return res.status(404).json({ error: "Therapy session not found." });
+        }
+
+        // 🔧 Pull from user's array using ObjectId match
+        const updateResult = await User.updateOne({ _id: userId }, { $pull: { ai_sessions_id: req.params.id } });
+
+        // Optional: verify update happened
+        if (updateResult.modifiedCount === 0) {
+            console.warn("⚠️ Session ID was not found in user's array (already removed?).");
+        }
+        // ✅ Delete the therapy session
+        await TherapySession.findByIdAndDelete(req.params.id);
+
+
+
+        res.status(200).json({ message: "Therapy session deleted successfully." });
     } catch (error) {
+        console.error("Error deleting therapy session:", error);
         res.status(500).json({ error: error.message });
     }
 };
