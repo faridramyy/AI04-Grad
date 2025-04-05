@@ -12,6 +12,7 @@ import userSettingsRoutes from "./routes/userSettingsRoutes.js";
 import aiMessageRoutes from "./routes/aiMessageRoutes.js";
 import severeCaseRoutes from "./routes/severeCaseRoutes.js";
 import stressScenarioRoutes from "./routes/stressScenarioRoutes.js";
+import cookieParser from "cookie-parser";
 
 
 
@@ -19,7 +20,11 @@ dotenv.config();
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin: "http://localhost:3000", // replace with your frontend URL
+    credentials: true,
+}));
+app.use(cookieParser()); // to parse cookies from requests
 
 app.use("/chat", chatRoutes);
 // backend and database crud operations

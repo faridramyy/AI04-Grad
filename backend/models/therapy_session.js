@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-
 const therapySessionSchema = new mongoose.Schema({
     patient_id: {
         type: mongoose.Schema.Types.ObjectId,
@@ -9,7 +8,7 @@ const therapySessionSchema = new mongoose.Schema({
     patient_emotion: {
         type: String,
         enum: ["neutral", "happy", "sad", "fear"],
-        required: true,
+        default: "neutral",
     },
     start_time: { type: Date, required: true },
     end_time: { type: Date, required: true },

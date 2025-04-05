@@ -54,13 +54,67 @@ export const getTherapySessionById = async(req, res) => {
  *  "end_time": "2024-04-01T11:00:00Z"
  * }
  */
+
+
 export const createTherapySession = async(req, res) => {
     try {
-        const newSession = new TherapySession(req.body);
-        const saved = await newSession.save();
-        res.status(201).json(saved);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
+        const {
+            patient_id,
+            patient_emotion,
+            start_time,
+            end_time,
+            stress_score_before,
+            stress_score_after,
+            emotion_records = [],
+            chat_sessions = [],
+            game_sessions = [],
+            challenges_sessions = [],
+        } = req.body;
+
+        // ✅ Check required fields
+        if (!patient_id || !patient_emotion || !start_time || !end_time) {
+            return res
+                .status(400)
+                .json({ error: "Missing required fields (patient_id, emotion, start/end time)." });
+        }
+
+        // ✅ Validate patient exists
+        const user = await User.findById(patient_id);
+        console.log(" i am validating the user and user is" + user);
+        if (!user) {
+            return res.status(404).json({ error: "User not found with the provided patient_id." });
+        }
+
+        // ✅ Validate emotion value
+        const allowedEmotions = ["neutral", "happy", "sad", "fear"];
+        if (!allowedEmotions.includes(patient_emotion)) {
+            return res.status(400).json({ error: "Invalid patient_emotion value." });
+        }
+
+        // ✅ Create the therapy session object
+        const newSession = new TherapySession({
+            patient_id,
+            patient_emotion,
+            start_time,
+            end_time,
+            stress_score_before: 0,
+            stress_score_after: 0,
+            emotion_records,
+            chat_sessions,
+            game_sessions,
+            challenges_sessions,
+        });
+
+        const savedSession = await newSession.save();
+
+        // ✅ Update user to push session ID
+        user.ai_sessions_id.push(savedSession._id);
+        await user.save();
+
+        res.status(201).json(savedSession);
+    } catch (err) {
+        console.error("Error creating therapy session:", err);
+        res.status(500).json({ error: err.message });
     }
 };
 
