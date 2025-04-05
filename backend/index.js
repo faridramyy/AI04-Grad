@@ -13,7 +13,8 @@ import aiMessageRoutes from "./routes/aiMessageRoutes.js";
 import severeCaseRoutes from "./routes/severeCaseRoutes.js";
 import stressScenarioRoutes from "./routes/stressScenarioRoutes.js";
 import cookieParser from "cookie-parser";
-
+// to run this backend u need : npm install express mongoose dotenv bcrypt jsonwebtoken cookie-parser cors
+// and create a .env file that has this in it JWT_SECRET=your_super_secret_key_here
 
 
 dotenv.config();
