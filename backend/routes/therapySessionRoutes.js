@@ -14,9 +14,9 @@ import {
 const router = express.Router();
 
 router.get("/", authMiddleware("admin"), getAllTherapySessions);
-router.get("/:id", authMiddleware("logged"), getTherapySessionById);
+router.get("/getMySessions", authMiddleware("logged"), getAllSessionsOfUser);
 router.get("/select_session/:id", authMiddleware("logged"), selectSession);
-router.get("/get_my_sessions", authMiddleware("logged"), getAllSessionsOfUser);
+router.get("/:id", authMiddleware("logged"), getTherapySessionById);
 router.post("/", authMiddleware("logged"), createTherapySession);
 router.put("/:id", authMiddleware("logged"), updateTherapySession);
 router.delete("/:id", authMiddleware("logged"), deleteTherapySession);
