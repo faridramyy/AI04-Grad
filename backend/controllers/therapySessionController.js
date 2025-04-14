@@ -60,17 +60,23 @@ export const getTherapySessionById = async(req, res) => {
 
 export const createTherapySession = async(req, res) => {
     try {
+
+        const token = req.cookies.token;
+        if (!token) return res.status(401).json({ error: "Unauthorized. No token." });
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const userId = decoded.userId;
         const {
-            patient_id,
-            patient_emotion,
-            start_time,
-            end_time,
-            stress_score_before = 0,
-            stress_score_after = 0,
-            emotion_records = [],
-            chat_sessions = [],
-            game_sessions = [],
-            challenges_sessions = [],
+            patient_id = userId,
+                patient_emotion,
+                start_time,
+                end_time,
+                stress_score_before = 0,
+                stress_score_after = 0,
+                emotion_records = [],
+                chat_sessions = [],
+                game_sessions = [],
+                challenges_sessions = [],
         } = req.body;
 
         // ✅ Check required fields
