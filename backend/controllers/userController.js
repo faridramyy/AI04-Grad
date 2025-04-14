@@ -7,6 +7,9 @@ import cookieParser from "cookie-parser";
 export const signinUser = async(req, res) => {
     try {
         const { username, password } = req.body;
+        if (!username || !password) {
+            return res.status(400).json({ error: "Username and password are required." });
+        }
 
         // 1. Check if username exists
         const user = await User.findOne({ username });

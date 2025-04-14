@@ -4,6 +4,7 @@ import GameSession from "../models/game_session.js";
 import User from "../models/user.js";
 import AI_Message from "../models/ai_messages.js";
 import jwt from "jsonwebtoken";
+
 /**
  * @route GET /api/therapy-sessions
  * @desc Get all therapy sessions
@@ -19,6 +20,7 @@ export const getAllTherapySessions = async(req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
 
 
 
@@ -63,8 +65,8 @@ export const createTherapySession = async(req, res) => {
             patient_emotion,
             start_time,
             end_time,
-            stress_score_before,
-            stress_score_after,
+            stress_score_before = 0,
+            stress_score_after = 0,
             emotion_records = [],
             chat_sessions = [],
             game_sessions = [],
@@ -200,6 +202,77 @@ export const deleteTherapySession = async(req, res) => {
         res.status(200).json({ message: "Therapy session deleted successfully." });
     } catch (error) {
         console.error("Error deleting therapy session:", error);
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
+
+
+export const selectSession = async(req, res) => {
+    try {
+        const sessionId = req.params.id;
+        const token = req.cookies.token;
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const userId = decoded.userId;
+
+
+        console.log("sessionid is  " + sessionId);
+        console.log("token is  " + token);
+        console.log("");
+
+
+
+        const session = await TherapySession.findById(sessionId)
+            .populate("emotion_records")
+            .populate("chat_sessions")
+            .populate("game_sessions");
+
+        if (!session) {
+            return res.status(404).json({ error: "Therapy session not found." });
+        }
+        // ✅ Ensure the session belongs to the logged-in user
+        if (session.patient_id.toString() !== userId) {
+            return res.status(403).json({ error: "Forbidden: This is not your session" });
+        }
+
+        // ✅ Store session ID in cookie
+        res.cookie("activeSessionId", sessionId, {
+            httpOnly: true,
+            sameSite: "Lax",
+            maxAge: 24 * 60 * 60 * 1000, // 1 day
+        });
+
+        res.status(200).json({
+            message: "Session selected successfully and stored in cookie.",
+            session,
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
+
+export const getAllSessionsOfUser = async(req, res) => {
+    try {
+        // ✅ Extract token from cookie and decode
+        console.log("iam here in the function");
+        const token = req.cookies.token;
+        if (!token) return res.status(401).json({ error: "Unauthorized. No token." });
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const userId = decoded.userId;
+
+        // ✅ Find all therapy sessions for this user
+        const sessions = await TherapySession.find({ patient_id: userId })
+            .populate("emotion_records")
+            .populate("chat_sessions")
+            .populate("game_sessions");
+
+        res.status(200).json(sessions);
+    } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
