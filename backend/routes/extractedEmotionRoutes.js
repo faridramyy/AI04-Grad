@@ -1,4 +1,6 @@
 import express from "express";
+import TherapySession from "../models/therapy_session.js";
+import { authMiddleware } from "../middlewares/authMiddleware.js";
 import {
     createExtractedEmotion,
     getAllExtractedEmotions,
@@ -9,10 +11,10 @@ import {
 
 const router = express.Router();
 
-router.post("/", createExtractedEmotion);
-router.get("/", getAllExtractedEmotions);
-router.get("/:id", getExtractedEmotionById);
-router.put("/:id", updateExtractedEmotion);
-router.delete("/:id", deleteExtractedEmotion);
+router.post("/", authMiddleware("logged"), createExtractedEmotion);
+router.get("/", authMiddleware("admin"), getAllExtractedEmotions);
+router.get("/:id", authMiddleware("logged"), getExtractedEmotionById);
+router.put("/:id", authMiddleware("logged"), updateExtractedEmotion);
+router.delete("/:id", authMiddleware("logged"), deleteExtractedEmotion);
 
 export default router;

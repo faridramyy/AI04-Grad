@@ -1,4 +1,5 @@
 import express from "express";
+import { authMiddleware } from "../middlewares/authMiddleware.js";
 import {
     getAllAIMessages,
     getAIMessageById,
@@ -9,10 +10,10 @@ import {
 
 const router = express.Router();
 
-router.get("/", getAllAIMessages);
-router.get("/:id", getAIMessageById);
-router.post("/", createAIMessage);
-router.put("/:id", updateAIMessage);
-router.delete("/:id", deleteAIMessage);
+router.get("/", authMiddleware("admin"), getAllAIMessages);
+router.get("/:id", authMiddleware("logged"), getAIMessageById);
+router.post("/", authMiddleware("logged"), createAIMessage);
+router.put("/:id", authMiddleware("logged"), updateAIMessage);
+router.delete("/:id", authMiddleware("logged"), deleteAIMessage);
 
 export default router;

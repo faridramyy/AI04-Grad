@@ -1,5 +1,6 @@
 import AI_Message from "../models/ai_messages.js";
 import TherapySession from "../models/therapy_session.js";
+import jwt from "jsonwebtoken";
 // @desc Get all AI messages
 export const getAllAIMessages = async(req, res) => {
     try {
@@ -76,6 +77,9 @@ export const updateAIMessage = async(req, res) => {
 // @desc Delete AI message
 export const deleteAIMessage = async(req, res) => {
     try {
+
+
+
         const sessionId = req.cookies.activeSessionId;
         if (!sessionId) return res.status(400).json({ error: "No active session selected" });
 

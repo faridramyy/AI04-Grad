@@ -7,7 +7,7 @@ const therapySessionSchema = new mongoose.Schema({
     },
     patient_emotion: {
         type: String,
-        enum: ["neutral", "happy", "sad", "fear"],
+        enum: ["neutral", "happy", "sad", "fear", "disgust", "angry", "depressed"],
         default: "neutral",
     },
     start_time: { type: Date, required: true },
