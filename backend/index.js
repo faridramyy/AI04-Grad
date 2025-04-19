@@ -13,8 +13,30 @@ import aiMessageRoutes from "./routes/aiMessageRoutes.js";
 import severeCaseRoutes from "./routes/severeCaseRoutes.js";
 import stressScenarioRoutes from "./routes/stressScenarioRoutes.js";
 import cookieParser from "cookie-parser";
-// to run this backend u need : npm install express mongoose dotenv bcrypt jsonwebtoken cookie-parser cors
-// and create a .env file that has this in it JWT_SECRET=your_super_secret_key_here
+import fs from 'fs';
+
+// // to run this backend u need : npm install express mongoose dotenv bcrypt jsonwebtoken cookie-parser cors
+// // and create a .env file that has this in it JWT_SECRET=your_super_secret_key_here
+// import admin from 'firebase-admin';
+// import { fileURLToPath } from 'url';
+// import { dirname, join } from 'path';
+
+// const __filename = fileURLToPath(
+//     import.meta.url);
+// const __dirname = dirname(__filename);
+
+// // load your service account JSON
+// const serviceAccount = JSON.parse(
+//     fs.readFileSync(join(__dirname, '/firebase/firebase_service_acc.json'), 'utf8')
+// );
+
+// admin.initializeApp({
+//     credential: admin.credential.cert(serviceAccount),
+//     databaseURL: "https://rina-users-inputs-default-rtdb.europe-west1.firebasedatabase.app"
+// });
+
+// // export the database reference
+// export const rtdb = admin.database();
 
 
 dotenv.config();
