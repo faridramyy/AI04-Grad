@@ -3,9 +3,11 @@ import { useChat } from "../hooks/useChat";
 
 export const UI = ({ hidden, ...props }) => {
   const input = useRef();
+  const videoPreviewRef = useRef(null);
   const {
-    chat,
+    chatText,
     chatAudio,
+    chatVideo,
     loading,
     cameraZoomed,
     setCameraZoomed,
@@ -13,10 +15,15 @@ export const UI = ({ hidden, ...props }) => {
     isRecording,
     startRecording,
     stopRecording,
+    isVideoRecording,
+    startVideoRecording,
+    stopVideoRecording,
   } = useChat();
 
   const [recordingTime, setRecordingTime] = useState(0);
   const mediaRecorderRef = useRef(null);
+  const [showVideoModal, setShowVideoModal] = useState(false);
+  const [videoStream, setVideoStream] = useState(null);
 
   // Format seconds into MM:SS display
   const formatTime = (seconds) => {
@@ -25,11 +32,11 @@ export const UI = ({ hidden, ...props }) => {
     return `${mins}:${secs}`;
   };
 
-  // Timer effect for recording duration
+  // Timer effect for recording duration (both audio and video)
   useEffect(() => {
     let interval;
 
-    if (isRecording) {
+    if (isRecording || isVideoRecording) {
       setRecordingTime(0);
 
       interval = setInterval(() => {
@@ -42,7 +49,21 @@ export const UI = ({ hidden, ...props }) => {
         clearInterval(interval);
       }
     };
-  }, [isRecording]);
+  }, [isRecording, isVideoRecording]);
+
+  // Effect to handle video stream
+  useEffect(() => {
+    if (videoStream && videoPreviewRef.current) {
+      videoPreviewRef.current.srcObject = videoStream;
+    }
+
+    // Cleanup
+    return () => {
+      if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, [videoStream]);
 
   const inputsDisabled = loading || message;
 
@@ -53,7 +74,7 @@ export const UI = ({ hidden, ...props }) => {
       return;
     }
     if (!inputsDisabled && text.trim()) {
-      chat(text);
+      chatText(text);
       input.current.value = "";
     }
   };
@@ -68,7 +89,7 @@ export const UI = ({ hidden, ...props }) => {
     } else {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const localAudioChunks = []; // ✅ local array
+        const localAudioChunks = [];
 
         const mediaRecorder = new MediaRecorder(stream);
         mediaRecorderRef.current = mediaRecorder;
@@ -100,6 +121,73 @@ export const UI = ({ hidden, ...props }) => {
     if (!inputsDisabled) {
       chatAudio(audioBlob, recordingTime);
     }
+  };
+
+  const openVideoRecorder = async () => {
+    if (inputsDisabled) return;
+    
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: true, 
+        audio: true 
+      });
+      
+      setVideoStream(stream);
+      setShowVideoModal(true);
+    } catch (error) {
+      console.error("Error accessing camera:", error);
+      alert("Could not access camera. Please ensure you've granted permission.");
+    }
+  };
+
+  const startVideoRecordingHandler = () => {
+    if (!videoStream) return;
+
+    const videoChunks = [];
+    const mediaRecorder = new MediaRecorder(videoStream);
+    mediaRecorderRef.current = mediaRecorder;
+
+    mediaRecorder.ondataavailable = (event) => {
+      if (event.data.size > 0) {
+        videoChunks.push(event.data);
+      }
+    };
+
+    mediaRecorder.onstop = () => {
+      const videoBlob = new Blob(videoChunks, { type: "video/webm" });
+      handleVideoMessage(videoBlob);
+      stopVideoRecording();
+    };
+
+    mediaRecorder.start();
+    startVideoRecording();
+  };
+
+  const stopVideoRecordingHandler = () => {
+    if (mediaRecorderRef.current) {
+      mediaRecorderRef.current.stop();
+    }
+  };
+
+  const handleVideoMessage = (videoBlob) => {
+    if (!inputsDisabled) {
+      chatVideo(videoBlob, recordingTime);
+      closeVideoModal();
+    }
+  };
+
+  const closeVideoModal = () => {
+    if (isVideoRecording && mediaRecorderRef.current) {
+      mediaRecorderRef.current.stop();
+    }
+    
+    if (videoStream) {
+      videoStream.getTracks().forEach(track => track.stop());
+      setVideoStream(null);
+    }
+    
+    setShowVideoModal(false);
+    stopVideoRecording();
   };
 
   if (hidden) return null;
@@ -147,7 +235,7 @@ export const UI = ({ hidden, ...props }) => {
           </button>
         </div>
 
-        {/* Bottom Input and Record Button */}
+        {/* Bottom Input and Controls */}
         <div className="flex items-center gap-2 pointer-events-auto max-w-screen-sm w-full mx-auto">
           <div className="flex items-center w-full relative">
             {isRecording ? (
@@ -158,9 +246,9 @@ export const UI = ({ hidden, ...props }) => {
                       <circle cx="12" cy="12" r="8" />
                     </svg>
                   </div>
-                  <span className="font-medium">Recording</span>
+                  <span className="font-medium">Recording Audio</span>
                 </div>
-                <div className="font-mono text-lg font-bold mr-10">{formatTime(recordingTime)}</div>
+                <div className="font-mono text-lg font-bold mr-20">{formatTime(recordingTime)}</div>
               </div>
             ) : (
               <input
@@ -175,13 +263,15 @@ export const UI = ({ hidden, ...props }) => {
                 }}
               />
             )}
+            
+            {/* Audio Recording Button */}
             <button
               onClick={toggleRecording}
-              disabled={inputsDisabled}
-              className={`absolute right-3 ${
+              disabled={inputsDisabled || isVideoRecording}
+              className={`absolute right-14 ${
                 isRecording ? "bg-red-500" : "bg-pink-500 hover:bg-pink-600"
               } ${
-                inputsDisabled ? "opacity-50 cursor-not-allowed" : ""
+                inputsDisabled || isVideoRecording ? "opacity-50 cursor-not-allowed" : ""
               } text-white p-2 rounded-full`}
             >
               {isRecording ? (
@@ -194,13 +284,26 @@ export const UI = ({ hidden, ...props }) => {
                 </svg>
               )}
             </button>
+            
+            {/* Video Recording Button */}
+            <button
+              onClick={openVideoRecorder}
+              disabled={inputsDisabled || isRecording}
+              className={`absolute right-3 ${
+                inputsDisabled || isRecording ? "opacity-50 cursor-not-allowed" : ""
+              } bg-pink-500 hover:bg-pink-600 text-white p-2 rounded-full`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                <path strokeLinecap="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M12 18.75H4.5a2.25 2.25 0 01-2.25-2.25V9a2.25 2.25 0 012.25-2.25H12a2.25 2.25 0 012.25 2.25v9a2.25 2.25 0 01-2.25 2.25z" />
+              </svg>
+            </button>
           </div>
 
           <button
-            disabled={inputsDisabled || isRecording}
+            disabled={inputsDisabled || isRecording || isVideoRecording}
             onClick={sendMessage}
             className={`bg-pink-500 hover:bg-pink-600 text-white p-4 px-10 font-semibold uppercase rounded-md flex items-center justify-center ${
-              inputsDisabled || isRecording ? "cursor-not-allowed opacity-30" : ""
+              inputsDisabled || isRecording || isVideoRecording ? "cursor-not-allowed opacity-30" : ""
             }`}
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2">
@@ -210,6 +313,70 @@ export const UI = ({ hidden, ...props }) => {
           </button>
         </div>
       </div>
+
+      {/* Video Recording Modal */}
+      {showVideoModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 pointer-events-auto">
+          <div className="bg-white rounded-lg p-4 max-w-md w-full">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Video Message</h3>
+              <button 
+                onClick={closeVideoModal}
+                className="p-1 rounded-full hover:bg-gray-200"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="relative bg-black rounded-lg overflow-hidden aspect-video mb-4">
+              <video 
+                ref={videoPreviewRef} 
+                autoPlay 
+                muted 
+                playsInline
+                className="w-full h-full object-cover"
+              ></video>
+              
+              {isVideoRecording && (
+                <div className="absolute top-2 left-2 flex items-center bg-black bg-opacity-60 text-white px-2 py-1 rounded-lg">
+                  <div className="animate-pulse mr-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-red-500">
+                      <circle cx="12" cy="12" r="8" />
+                    </svg>
+                  </div>
+                  <span className="font-medium text-sm">{formatTime(recordingTime)}</span>
+                </div>
+              )}
+            </div>
+            
+            <div className="flex justify-center">
+              {!isVideoRecording ? (
+                <button
+                  onClick={startVideoRecordingHandler}
+                  className="bg-pink-500 hover:bg-pink-600 text-white font-medium py-2 px-4 rounded-lg flex items-center"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2">
+                    <circle cx="12" cy="12" r="8" fill="currentColor" />
+                  </svg>
+                  Start Recording
+                </button>
+              ) : (
+                <button
+                  onClick={stopVideoRecordingHandler}
+                  className="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg flex items-center"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 7.5A2.25 2.25 0 017.5 5.25h9a2.25 2.25 0 012.25 2.25v9a2.25 2.25 0 01-2.25 2.25h-9a2.25 2.25 0 01-2.25-2.25v-9z" />
+                  </svg>
+                  Stop Recording
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

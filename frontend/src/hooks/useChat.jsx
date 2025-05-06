@@ -10,9 +10,10 @@ export const ChatProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [cameraZoomed, setCameraZoomed] = useState(true);
   const [isRecording, setIsRecording] = useState(false);
+  const [isVideoRecording, setIsVideoRecording] = useState(false);
 
   // Function to send text messages
-  const chat = async (message) => {
+  const chatText = async (message) => {
     if (loading || messages.length > 0) return; // Prevent sending if already loading or there are pending messages
 
     setLoading(true);
@@ -69,6 +70,41 @@ export const ChatProvider = ({ children }) => {
     }
   };
 
+  // Function to send video messages
+  const chatVideo = async (videoBlob, videoDuration) => {
+    if (loading || messages.length > 0) return; // Prevent sending if already loading
+
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("video", videoBlob, "recording.webm");
+      formData.append("duration", videoDuration);
+
+      const response = await fetch(`${backendUrl}/api/therapy-reply/video`, {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      console.log(data);
+
+      if (!response.ok) {
+        throw new Error(data.error || "Unknown error from server");
+      }
+
+      if (!Array.isArray(data.messages)) {
+        throw new Error("Invalid response format: messages not found");
+      }
+
+      setMessages((messages) => [...messages, ...data.messages]);
+    } catch (error) {
+      alert("Error sending video message: " + (error.message || error));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // For direct recording state management
   const startRecording = () => {
     if (loading || messages.length > 0) return; // Don't start recording if busy
@@ -77,6 +113,15 @@ export const ChatProvider = ({ children }) => {
 
   const stopRecording = () => {
     setIsRecording(false);
+  };
+
+  const startVideoRecording = () => {
+    if (loading || messages.length > 0) return; // Don't start recording if busy
+    setIsVideoRecording(true);
+  };
+
+  const stopVideoRecording = () => {
+    setIsVideoRecording(false);
   };
 
   const onMessagePlayed = () => {
@@ -94,8 +139,9 @@ export const ChatProvider = ({ children }) => {
   return (
     <ChatContext.Provider
       value={{
-        chat,
+        chatText,
         chatAudio,
+        chatVideo,
         message,
         onMessagePlayed,
         loading,
@@ -104,6 +150,9 @@ export const ChatProvider = ({ children }) => {
         isRecording,
         startRecording,
         stopRecording,
+        isVideoRecording,
+        startVideoRecording,
+        stopVideoRecording,
       }}
     >
       {children}
