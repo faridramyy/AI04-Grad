@@ -151,3 +151,8 @@ export const textReply = async (req, res) => {
       .send({ messages: [], error: "Failed to get response from Gemini" });
   }
 };
+
+export const audioReply = async (req, res) => {};
+
+
+export const videoReply = async (req, res) => {};
