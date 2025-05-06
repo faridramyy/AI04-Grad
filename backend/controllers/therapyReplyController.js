@@ -2,6 +2,7 @@ import { ElevenLabsClient } from "elevenlabs";
 import { promises as fs } from "fs";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { exec } from "child_process";
+import path from "path";
 import secrets from "../config/secrets.js";
 
 const genAI = new GoogleGenerativeAI(secrets.GOOGLE_API_KEY);
@@ -153,7 +154,48 @@ export const textReply = async (req, res) => {
 };
 
 export const audioReply = async (req, res) => {
-  console.log("audio")
+  try {
+    const file = req.file;
+    const duration = req.body.duration;
+
+    if (!file || file.size < 500) {
+      return res
+        .status(400)
+        .json({ error: "Uploaded file is empty or too small." });
+    }
+
+    console.log(`Audio file saved at: ${file.path}`);
+    console.log(`Audio duration: ${duration} seconds`);
+
+    // New Part: Convert to WAV using ffmpeg
+    const inputPath = file.path;
+    const outputPath = inputPath.replace(path.extname(inputPath), ".wav");
+
+    await new Promise((resolve, reject) => {
+      exec(
+        `ffmpeg -y -i "${inputPath}" "${outputPath}"`,
+        (error, stdout, stderr) => {
+          if (error) {
+            console.error("Error converting to WAV:", error);
+            return reject(error);
+          }
+          console.log("Conversion to WAV successful");
+          resolve();
+          fs.unlink(inputPath);
+          console.log("Original WEBM file deleted");
+        }
+      );
+    });
+
+    await sendDefaultIntro(res);
+  } catch (error) {
+    console.error("Error:", error);
+    res
+      .status(500)
+      .send({ messages: [], error: "Failed to get response from Gemini" });
+  }
 };
 
-export const videoReply = async (req, res) => {};
+export const videoReply = async (req, res) => {
+  res.send({ messages: [{ text: "Video feature not implemented yet." }] });
+};

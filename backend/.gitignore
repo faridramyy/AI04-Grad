@@ -1,6 +1,4 @@
 .env
 node_modules
-bin
 audios/message_*
-firebase/firebase_service_acc.json
-/backend/firebase/firebase_service_acc.json
+uploads

@@ -14,7 +14,7 @@ export const ChatProvider = ({ children }) => {
   // Function to send text messages
   const chat = async (message) => {
     if (loading || messages.length > 0) return; // Prevent sending if already loading or there are pending messages
-    
+
     setLoading(true);
     try {
       const data = await fetch(`${backendUrl}/api/therapy-reply/text`, {
@@ -35,27 +35,35 @@ export const ChatProvider = ({ children }) => {
 
   // Function to send audio messages
   const chatAudio = async (audioBlob, audioDuration) => {
-    if (loading || messages.length > 0) return; // Prevent sending if already loading or there are pending messages
-    
+    if (loading || messages.length > 0) return; // Prevent sending if already loading
+
     setLoading(true);
     try {
-      // Create a FormData object to send the audio file
       const formData = new FormData();
-      formData.append("audio", audioBlob, "recording.wav");
-      
-      // If you want to include metadata like duration
+      formData.append("audio", audioBlob, "recording.webm");
       formData.append("duration", audioDuration);
 
-      const data = await fetch(`${backendUrl}/api/therapy-reply/audio`, {
+      const response = await fetch(`${backendUrl}/api/therapy-reply/audio`, {
         method: "POST",
         body: formData,
       });
-      
-      const resp = (await data.json()).messages;
-      setMessages((messages) => [...messages, ...resp]);
+
+      const data = await response.json(); // Get full response
+
+      console.log(data)
+
+      if (!response.ok) {
+        // If backend returns error (400, 500), throw it
+        throw new Error(data.error || "Unknown error from server");
+      }
+
+      if (!Array.isArray(data.messages)) {
+        throw new Error("Invalid response format: messages not found");
+      }
+
+      setMessages((messages) => [...messages, ...data.messages]); // <-- Use data.messages safely now
     } catch (error) {
-      console.error("Error sending audio message:", error);
-      // Don't add fallback message if already loading/processing
+      alert("Error sending audio message:", error.message || error);
     } finally {
       setLoading(false);
     }
@@ -95,7 +103,7 @@ export const ChatProvider = ({ children }) => {
         setCameraZoomed,
         isRecording,
         startRecording,
-        stopRecording
+        stopRecording,
       }}
     >
       {children}
