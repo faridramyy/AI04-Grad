@@ -30,7 +30,7 @@ const upload = multer({ storage: storage });
 app.post('/transcribe-video', upload.single('video'), (req, res) => {
   const filePath = req.file.path;
 
-  const pythonPath = 'C:/Users/dell/anaconda3/envs/whisper_env/python.exe';  // Adjust if needed
+  const pythonPath = 'C:/Users/dell/anaconda3/envs/whisper_env/python.exe';  
   const python = spawn(pythonPath, ['transcribe.py', filePath]);
 
   let transcription = '';
