@@ -1,7 +1,7 @@
 import { ElevenLabsClient } from "elevenlabs";
-import { promises as fs } from "fs";
+import { promises as fs } from "fs"; // ✅ ONLY THIS
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { exec } from "child_process";
+import { exec, spawn } from "child_process"; // ✅ you forgot spawn before
 import path from "path";
 import secrets from "../config/secrets.js";
 
@@ -167,32 +167,113 @@ export const audioReply = async (req, res) => {
     console.log(`Audio file saved at: ${file.path}`);
     console.log(`Audio duration: ${duration} seconds`);
 
-    // New Part: Convert to WAV using ffmpeg
     const inputPath = file.path;
     const outputPath = inputPath.replace(path.extname(inputPath), ".wav");
 
+    // Convert audio from webm to WAV
     await new Promise((resolve, reject) => {
       exec(
         `ffmpeg -y -i "${inputPath}" "${outputPath}"`,
         (error, stdout, stderr) => {
           if (error) {
-            console.error("Error converting to WAV:", error);
+            console.error("Error converting to WAV:", stderr || error.message);
             return reject(error);
           }
           console.log("Conversion to WAV successful");
           resolve();
-          fs.unlink(inputPath);
-          console.log("Original WEBM file deleted");
         }
       );
     });
 
-    await sendDefaultIntro(res);
+    // Delete the original uploaded file after conversion
+    try {
+      await fs.unlink(inputPath);
+      console.log("Original uploaded file deleted:", inputPath);
+    } catch (unlinkError) {
+      console.warn("Failed to delete original file:", unlinkError.message);
+    }
+
+    const pythonScriptPath = path.join(
+      process.cwd(),
+      "utilities",
+      "audioToText.py"
+    );
+    const pythonExecutable =
+      process.platform === "win32" ? "python" : "python3";
+
+    const python = spawn(pythonExecutable, [pythonScriptPath, outputPath]);
+
+    let transcription = "";
+    let errorOutput = "";
+
+    python.stdout.on("data", (data) => {
+      transcription += data.toString();
+    });
+
+    python.stderr.on("data", (data) => {
+      errorOutput += data.toString();
+    });
+
+    python.on("close", async (code) => {
+      try {
+        await fs.unlink(outputPath);
+        console.log("WAV file deleted:", outputPath);
+      } catch (unlinkError) {
+        console.warn("Failed to delete WAV file:", unlinkError.message);
+      }
+
+      if (code !== 0) {
+        console.error("Transcription failed:", errorOutput);
+        return res
+          .status(500)
+          .json({ error: "Transcription failed", details: errorOutput });
+      }
+
+      try {
+        const transcribedText = transcription.trim();
+        console.log("Transcribed Text:", transcribedText);
+
+        const answer = await generateTherapyReply(transcribedText);
+        console.log("Therapy Answer:", answer);
+
+        const sentences = answer
+          .split(/(?<=[.!?])\s+/)
+          .map((sentence) => sentence.trim())
+          .filter((sentence) => sentence.length > 0);
+
+        const messages = [];
+
+        for (let i = 0; i < sentences.length; i++) {
+          const message = await generateAudioAndLipSync(sentences[i], i);
+          messages.push(message);
+        }
+
+        res.send({ messages });
+      } catch (error) {
+        console.error("Error after transcription:", error);
+        res
+          .status(500)
+          .send({
+            messages: [],
+            error: "Failed to process transcription response",
+          });
+      }
+    });
+
+    python.on("error", (error) => {
+      console.error("Failed to start Python process:", error.message);
+      res
+        .status(500)
+        .json({
+          error: "Failed to start Python script",
+          details: error.message,
+        });
+    });
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Unexpected error:", error);
     res
       .status(500)
-      .send({ messages: [], error: "Failed to get response from Gemini" });
+      .json({ error: "Failed to process audio", details: error.message });
   }
 };
 
