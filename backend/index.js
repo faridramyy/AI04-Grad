@@ -14,15 +14,11 @@ import userSettingsRoutes from "./routes/userSettingsRoutes.js";
 import aiMessageRoutes from "./routes/aiMessageRoutes.js";
 import severeCaseRoutes from "./routes/severeCaseRoutes.js";
 import stressScenarioRoutes from "./routes/stressScenarioRoutes.js";
+import therapyReplyRoutes from "./routes/therapyReplyRoutes.js";
 
 const port = secrets.PORT;
 const app = express();
-app.use(
-  cors({
-    origin: secrets.FRONTEND_URL,
-    credentials: true,
-  })
-);
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -37,8 +33,10 @@ app.use("/api/ai-messages", aiMessageRoutes);
 app.use("/api/severe-cases", severeCaseRoutes);
 app.use("/api/stress-scenarios", stressScenarioRoutes);
 
-connectDB().then(() => {
-  app.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`);
-  });
+app.use("/api/therapy-reply", therapyReplyRoutes);
+
+// connectDB().then(() => {
+app.listen(port, () => {
+  console.log(`Server running on http://localhost:${port}`);
 });
+// });

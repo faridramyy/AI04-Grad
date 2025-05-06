@@ -2,10 +2,10 @@ import { ElevenLabsClient } from "elevenlabs";
 import { promises as fs } from "fs";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { exec } from "child_process";
+import secrets from "../config/secrets.js";
 
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
-const elevenLabsApiKey = process.env.ELEVEN_LABS_API_KEY;
-const voiceID = "kgG7dCoKCfLehAPWkJOE";
+const genAI = new GoogleGenerativeAI(secrets.GOOGLE_API_KEY);
+const elevenLabsApiKey = secrets.ELEVEN_LABS_API_KEY;
 
 const elevenlabs = new ElevenLabsClient({
   apiKey: elevenLabsApiKey,
@@ -43,8 +43,9 @@ const audioFileToBase64 = async (file) => {
   return data.toString("base64");
 };
 
-app.post("/chat", async (req, res) => {
+export const textReply = async (req, res) => {
   const userMessage = req.body.message;
+  
   if (!userMessage) {
     res.send({
       messages: [
@@ -140,4 +141,4 @@ app.post("/chat", async (req, res) => {
       .status(500)
       .send({ messages: [], error: "Failed to get response from Gemini" });
   }
-});
+};

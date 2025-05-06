@@ -1,11 +1,11 @@
 import express from "express";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
 import {
-    getAllAIMessages,
-    getAIMessageById,
-    createAIMessage,
-    updateAIMessage,
-    deleteAIMessage,
+  getAllAIMessages,
+  getAIMessageById,
+  createAIMessage,
+  updateAIMessage,
+  deleteAIMessage,
 } from "../controllers/aiMessageController.js";
 
 const router = express.Router();
