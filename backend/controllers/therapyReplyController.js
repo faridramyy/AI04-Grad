@@ -43,94 +43,103 @@ const audioFileToBase64 = async (file) => {
   return data.toString("base64");
 };
 
-export const textReply = async (req, res) => {
-  const userMessage = req.body.message;
-  
-  if (!userMessage) {
-    res.send({
-      messages: [
-        {
-          text: "Hey dear... How was your day?",
-          audio: await audioFileToBase64("audios/intro_0.wav"),
-          lipsync: await readJsonTranscript("audios/intro_0.json"),
-          facialExpression: "smile",
-          animation: "Talking_1",
-        },
-      ],
-    });
-    return;
-  }
+const generateTherapyReply = async (userMessage) => {
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-  if (!elevenLabsApiKey || !process.env.GOOGLE_API_KEY) {
-    res.send({
-      messages: [
-        {
-          text: "Please my dear, don't forget to add your API keys!",
-          audio: await audioFileToBase64("audios/api_0.wav"),
-          lipsync: await readJsonTranscript("audios/api_0.json"),
-          facialExpression: "angry",
-          animation: "Angry",
-        },
-      ],
-    });
-    return;
-  }
-
-  try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-    const therapyPrompt = `
+  const therapyPrompt = `
     You are a compassionate and supportive therapist.
     You listen carefully, show empathy, and help users explore their feelings.
     Avoid giving direct advice. Instead, ask gentle, open-ended questions that encourage reflection.
     Always maintain a warm, patient, and non-judgmental tone.
     `;
 
-    const result = await model.generateContent({
-      contents: [
-        {
-          parts: [{ text: therapyPrompt }, { text: userMessage }],
-        },
-      ],
-    });
+  const result = await model.generateContent({
+    contents: [
+      {
+        parts: [{ text: therapyPrompt }, { text: userMessage }],
+      },
+    ],
+  });
 
-    const answer = await result.response.text();
+  return result.response.text();
+};
+
+const generateAudioAndLipSync = async (text, index) => {
+  const fileName = `audios/message_${index}.mp3`;
+
+  const audio = await elevenlabs.generate({
+    voice: "Sarah",
+    text,
+    model_id: "eleven_multilingual_v2",
+  });
+
+  await fs.writeFile(fileName, audio, "binary");
+  await lipSyncMessage(index);
+
+  return {
+    text,
+    audio: await audioFileToBase64(fileName),
+    lipsync: await readJsonTranscript(`audios/message_${index}.json`),
+    facialExpression: "neutral",
+    animation: "Idle",
+  };
+};
+
+const sendDefaultIntro = async (res) => {
+  res.send({
+    messages: [
+      {
+        text: "Hey dear... How was your day?",
+        audio: await audioFileToBase64("audios/intro_0.wav"),
+        lipsync: await readJsonTranscript("audios/intro_0.json"),
+        facialExpression: "smile",
+        animation: "Talking_1",
+      },
+    ],
+  });
+};
+
+const sendMissingKeysMessage = async (res) => {
+  res.send({
+    messages: [
+      {
+        text: "Please my dear, don't forget to add your API keys!",
+        audio: await audioFileToBase64("audios/api_0.wav"),
+        lipsync: await readJsonTranscript("audios/api_0.json"),
+        facialExpression: "angry",
+        animation: "Angry",
+      },
+    ],
+  });
+};
+
+export const textReply = async (req, res) => {
+  const userMessage = req.body.message;
+
+  if (!userMessage) {
+    await sendDefaultIntro(res);
+    return;
+  }
+
+  if (!elevenLabsApiKey || !process.env.GOOGLE_API_KEY) {
+    await sendMissingKeysMessage(res);
+    return;
+  }
+
+  try {
+    const answer = await generateTherapyReply(userMessage);
 
     console.log(answer);
 
     const sentences = answer
-      .split(/(?<=[.!?])\s+/) // split after . ! or ? followed by a space
-      .map((sentence) => sentence.trim()) // remove extra spaces
-      .filter((sentence) => sentence.length > 0); // remove any empty sentences
+      .split(/(?<=[.!?])\s+/)
+      .map((sentence) => sentence.trim())
+      .filter((sentence) => sentence.length > 0);
 
     const messages = [];
 
     for (let i = 0; i < sentences.length; i++) {
-      const text = sentences[i]; // the text of the sentence
-      const fileName = `audios/message_${i}.mp3`;
-      // Generate audio
-
-      const audio = await elevenlabs.generate({
-        voice: "Sarah",
-        text,
-        model_id: "eleven_multilingual_v2",
-      });
-
-      // Save audio buffer to file
-      await fs.writeFile(fileName, audio, "binary");
-
-      // Generate lipsync
-      await lipSyncMessage(i);
-
-      // Build the message object
-      const message = {
-        text: text,
-        audio: await audioFileToBase64(fileName),
-        lipsync: await readJsonTranscript(`audios/message_${i}.json`),
-        facialExpression: "neutral", // or you can pick based on mood later
-        animation: "Idle", // default animation
-      };
-
+      const message = await generateAudioAndLipSync(sentences[i], i);
       messages.push(message);
     }
 
