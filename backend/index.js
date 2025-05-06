@@ -1,10 +1,22 @@
-import { exec } from "child_process";
+import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import mongoose from "mongoose";
+import cookieParser from "cookie-parser";
 import { ElevenLabsClient } from "elevenlabs";
-import express from "express";
 import { promises as fs } from "fs";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { exec } from "child_process";
+//routes
+import userRoutes from "./routes/userRoutes.js";
+import therapySessionRoutes from "./routes/therapySessionRoutes.js";
+import extractedEmotionRoutes from "./routes/extractedEmotionRoutes.js";
+import gameSessionRoutes from "./routes/gameSessionRoutes.js";
+import userFeedbackRoutes from "./routes/userFeedbackRoutes.js";
+import userSettingsRoutes from "./routes/userSettingsRoutes.js";
+import aiMessageRoutes from "./routes/aiMessageRoutes.js";
+import severeCaseRoutes from "./routes/severeCaseRoutes.js";
+import stressScenarioRoutes from "./routes/stressScenarioRoutes.js";
 
 dotenv.config();
 
