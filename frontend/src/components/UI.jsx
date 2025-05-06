@@ -1,17 +1,121 @@
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useChat } from "../hooks/useChat";
 
 export const UI = ({ hidden, ...props }) => {
   const input = useRef();
-  const { chat, loading, cameraZoomed, setCameraZoomed, message } = useChat();
+  const {
+    chat,
+    chatAudio,
+    loading,
+    cameraZoomed,
+    setCameraZoomed,
+    message,
+    isRecording,
+    startRecording,
+    stopRecording,
+  } = useChat();
+
+  const [audioChunks, setAudioChunks] = useState([]);
+  const [recordingTime, setRecordingTime] = useState(0);
+  const mediaRecorderRef = useRef(null);
+
+  // Format seconds into MM:SS display
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60)
+      .toString()
+      .padStart(2, "0");
+    const secs = (seconds % 60).toString().padStart(2, "0");
+    return `${mins}:${secs}`;
+  };
+
+  // Timer effect for recording duration
+  useEffect(() => {
+    let interval;
+
+    if (isRecording) {
+      // Reset recording time when starting a new recording
+      setRecordingTime(0);
+
+      // Set up interval to update every second
+      interval = setInterval(() => {
+        setRecordingTime((prevTime) => prevTime + 1);
+      }, 1000);
+    }
+
+    // Cleanup function to clear interval when component unmounts or recording stops
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [isRecording]);
+
+  // Check if inputs should be disabled
+  const inputsDisabled = loading || message;
 
   const sendMessage = () => {
     const text = input.current.value;
-    if (!loading && !message) {
+    if (text.trim() === "") alert("Message Can't be empty");
+    if (!inputsDisabled && text.trim()) {
       chat(text);
       input.current.value = "";
     }
   };
+
+  const toggleRecording = async () => {
+    if (inputsDisabled) return; // Prevent recording toggle if inputs are disabled
+
+    if (isRecording) {
+      // Stop recording
+      if (mediaRecorderRef.current) {
+        mediaRecorderRef.current.stop();
+      }
+      stopRecording();
+    } else {
+      try {
+        // Start recording
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+        });
+        const mediaRecorder = new MediaRecorder(stream);
+        mediaRecorderRef.current = mediaRecorder;
+
+        // Clear previous chunks
+        setAudioChunks([]);
+
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0) {
+            setAudioChunks((prev) => [...prev, event.data]);
+          }
+        };
+
+        mediaRecorder.onstop = () => {
+          // Convert audio chunks to blob and handle the recording
+          const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
+          handleAudioMessage(audioBlob);
+
+          // Stop all tracks to release the microphone
+          stream.getTracks().forEach((track) => track.stop());
+        };
+
+        mediaRecorder.start();
+        startRecording();
+      } catch (error) {
+        console.error("Error accessing microphone:", error);
+        alert(
+          "Could not access microphone. Please ensure you've granted permission."
+        );
+      }
+    }
+  };
+
+  const handleAudioMessage = (audioBlob) => {
+    // Send the audio blob to the backend via the chatAudio function
+    if (!inputsDisabled) {
+      chatAudio(audioBlob, recordingTime);
+    }
+  };
+
   if (hidden) {
     return null;
   }
@@ -87,23 +191,104 @@ export const UI = ({ hidden, ...props }) => {
           </button>
         </div>
         <div className="flex items-center gap-2 pointer-events-auto max-w-screen-sm w-full mx-auto">
-          <input
-            className="w-full placeholder:text-gray-800 placeholder:italic p-4 rounded-md bg-opacity-50 bg-white backdrop-blur-md"
-            placeholder="Type a message..."
-            ref={input}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                sendMessage();
-              }
-            }}
-          />
+          <div className="flex items-center w-full relative">
+            {isRecording ? (
+              <div className="w-full flex items-center justify-between bg-opacity-50 bg-white backdrop-blur-md rounded-md p-4">
+                <div className="flex items-center">
+                  <div className="animate-pulse mr-2">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      className="w-5 h-5 text-red-500"
+                    >
+                      <circle cx="12" cy="12" r="8" />
+                    </svg>
+                  </div>
+                  <span className="font-medium">Recording</span>
+                </div>
+                <div className="font-mono text-lg font-bold mr-10">
+                  {formatTime(recordingTime)}
+                </div>
+              </div>
+            ) : (
+              <input
+                className="w-full placeholder:text-gray-800 placeholder:italic p-4 rounded-md bg-opacity-50 bg-white backdrop-blur-md"
+                placeholder="Type a message..."
+                ref={input}
+                disabled={inputsDisabled}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    sendMessage();
+                  }
+                }}
+              />
+            )}
+            <button
+              onClick={toggleRecording}
+              disabled={inputsDisabled}
+              className={`absolute right-3 ${
+                isRecording ? "bg-red-500" : "bg-pink-500 hover:bg-pink-600"
+              } ${
+                inputsDisabled ? "opacity-50 cursor-not-allowed" : ""
+              } text-white p-2 rounded-full`}
+            >
+              {isRecording ? (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="w-5 h-5"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M5.25 7.5A2.25 2.25 0 017.5 5.25h9a2.25 2.25 0 012.25 2.25v9a2.25 2.25 0 01-2.25 2.25h-9a2.25 2.25 0 01-2.25-2.25v-9z"
+                  />
+                </svg>
+              ) : (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="w-5 h-5"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z"
+                  />
+                </svg>
+              )}
+            </button>
+          </div>
           <button
-            disabled={loading || message}
+            disabled={inputsDisabled || isRecording}
             onClick={sendMessage}
-            className={`bg-pink-500 hover:bg-pink-600 text-white p-4 px-10 font-semibold uppercase rounded-md ${
-              loading || message ? "cursor-not-allowed opacity-30" : ""
+            className={`bg-pink-500 hover:bg-pink-600 text-white p-4 px-10 font-semibold uppercase rounded-md flex items-center justify-center ${
+              inputsDisabled || isRecording
+                ? "cursor-not-allowed opacity-30"
+                : ""
             }`}
           >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-5 h-5 mr-2"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"
+              />
+            </svg>
             Send
           </button>
         </div>

@@ -115,7 +115,7 @@ const sendMissingKeysMessage = async (res) => {
 
 export const textReply = async (req, res) => {
   const userMessage = req.body.message;
-
+  console.log(userMessage);
   if (!userMessage) {
     await sendDefaultIntro(res);
     return;
@@ -152,7 +152,8 @@ export const textReply = async (req, res) => {
   }
 };
 
-export const audioReply = async (req, res) => {};
-
+export const audioReply = async (req, res) => {
+  console.log("audio")
+};
 
 export const videoReply = async (req, res) => {};
