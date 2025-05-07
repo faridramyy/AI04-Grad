@@ -1,6 +1,8 @@
 import AI_Message from "../models/ai_messages.js";
 import TherapySession from "../models/therapy_session.js";
 import jwt from "jsonwebtoken";
+import User from "../models/user.js";
+import { textReply, audioReply, videoReply, generateTherapyReply } from "../controllers/therapyReplyController.js";
 // @desc Get all AI messages
 export const getAllAIMessages = async(req, res) => {
     try {
@@ -37,14 +39,29 @@ export const createAIMessage = async(req, res) => {
     try {
         const sessionId = req.cookies.activeSessionId;
         if (!sessionId) return res.status(400).json({ error: "No active session selected" });
+        const token = req.cookies.token;
+        if (!token) return res.status(401).json({ error: "Unauthorized. No token." });
 
-        const { sender_id, message_text, response } = req.body;
-        if (!sender_id || !message_text || !response) {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const userId = decoded.userId;
+
+        const { message_text } = req.body;
+        if (!message_text) {
             return res.status(400).json({ error: "Missing required fields" });
         }
+        // ✅ Validate patient exists
+        const user = await User.findById(userId);
+        console.log(" i am validating the user and user is" + user);
+        if (!user) {
+            return res.status(404).json({ error: "User not found with the provided patient_id." });
+        }
+        console.log("");
+        console.log("i am here here");
+        response = await generateTherapyReply(message_text);
+        console.log(response);
 
         const newMsg = await AI_Message.create({
-            sender_id,
+            sender_id: userId,
             message_text,
             response,
             chat_session_id: sessionId,
