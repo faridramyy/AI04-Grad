@@ -252,16 +252,20 @@ export const UI = ({ hidden, ...props }) => {
               </div>
             ) : (
               <input
-                className="w-full placeholder:text-gray-800 placeholder:italic p-4 rounded-md bg-opacity-50 bg-white backdrop-blur-md"
-                placeholder="Type a message..."
-                ref={input}
-                disabled={inputsDisabled}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    sendMessage();
-                  }
-                }}
-              />
+              className="w-full placeholder:text-gray-800 placeholder:italic pr-24 p-4 rounded-md bg-opacity-50 bg-white backdrop-blur-md"
+              placeholder="Type a message..."
+              ref={input}
+              disabled={inputsDisabled}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  sendMessage();
+                }
+              }}
+            />
+            
+            
+            
+            
             )}
             
             {/* Audio Recording Button */}
