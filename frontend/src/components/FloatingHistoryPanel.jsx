@@ -104,6 +104,7 @@ export default function FloatingHistoryPanel() {
           className="fixed top-4 left-0 bg-pink-500 hover:bg-pink-600 text-white p-2 rounded-r-md shadow-md z-50 flex items-center"
           aria-label="Open history panel"
         >
+          <span className="ml-1">Chat History</span>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="20"
@@ -117,7 +118,6 @@ export default function FloatingHistoryPanel() {
           >
             <path d="M9 18l6-6-6-6" />
           </svg>
-          <span className="ml-1">History</span>
         </button>
       )}
     </div>
