@@ -1,0 +1,1547 @@
+{
+    "intents": [
+      {
+        "tag": "stress_situation",
+        "emotion": "stress",
+        "scenario": "You have a major deadline approaching, but you're feeling overwhelmed. What do you do?",
+        "responses": [
+          { "option": "Take a break and go for a short walk.", "reward": 2 },
+          {
+            "option": "Panic and procrastinate until the last minute.",
+            "reward": -3
+          },
+          {
+            "option": "Make a plan and break the task into smaller steps.",
+            "reward": 3
+          },
+          { "option": "Ignore the deadline and watch TV instead.", "reward": -2 }
+        ]
+      },
+      {
+        "tag": "anger_management",
+        "emotion": "angry",
+        "scenario": "You had an argument with a friend, and you're feeling angry. What do you do?",
+        "responses": [
+          {
+            "option": "Take deep breaths and calm yourself before responding.",
+            "reward": 3
+          },
+          {
+            "option": "Immediately send an angry message without thinking.",
+            "reward": -3
+          },
+          { "option": "Talk to someone else to gain perspective.", "reward": 2 },
+          { "option": "Keep overthinking and get even more upset.", "reward": -2 }
+        ]
+      },
+      {
+        "tag": "sadness_management",
+        "emotion": "sad",
+        "scenario": "You have been feeling down and unmotivated for a while. What do you do?",
+        "responses": [
+          {
+            "option": "Reach out to a close friend or family member.",
+            "reward": 3
+          },
+          {
+            "option": "Stay alone and dwell on negative thoughts.",
+            "reward": -3
+          },
+          {
+            "option": "Engage in an activity you enjoy, like listening to music.",
+            "reward": 2
+          },
+          {
+            "option": "Ignore your feelings and pretend everything is fine.",
+            "reward": -2
+          }
+        ]
+      },
+      {
+        "tag": "social_anxiety",
+        "emotion": "fear",
+        "scenario": "You're at a social event, and you feel anxious. How do you handle it?",
+        "responses": [
+          {
+            "option": "Find one person to talk to instead of focusing on the crowd.",
+            "reward": 3
+          },
+          {
+            "option": "Leave immediately without trying to engage.",
+            "reward": -2
+          },
+          {
+            "option": "Use a grounding technique like deep breathing.",
+            "reward": 2
+          },
+          { "option": "Stay silent and let your anxiety build up.", "reward": -3 }
+        ]
+      },
+      {
+        "tag": "happiness_boost",
+        "emotion": "happy",
+        "scenario": "You are in a great mood today! What would you like to do?",
+        "responses": [
+          {
+            "option": "Do something kind for someone else to spread happiness.",
+            "reward": 3
+          },
+          {
+            "option": "Enjoy the moment and engage in a favorite hobby.",
+            "reward": 2
+          },
+          {
+            "option": "Overthink about whether this happiness will last.",
+            "reward": -2
+          },
+          {
+            "option": "Isolate yourself instead of sharing your happiness.",
+            "reward": -3
+          }
+        ]
+      },
+      {
+        "tag": "neutral_mood",
+        "emotion": "neutral",
+        "scenario": "It's a regular day. You feel neither good nor bad. How do you spend your time?",
+        "responses": [
+          {
+            "option": "Try a new activity or hobby to make the day interesting.",
+            "reward": 3
+          },
+          {
+            "option": "Go through your routine without changing anything.",
+            "reward": 1
+          },
+          {
+            "option": "Stay on your phone all day without doing anything productive.",
+            "reward": -2
+          },
+          {
+            "option": "Find something to stress about even if there is none.",
+            "reward": -3
+          }
+        ]
+      },
+      {
+        "tag": "stress_situation",
+        "emotion": "stress",
+        "scenario": "You have a major deadline approaching, but you're feeling overwhelmed. What do you do?",
+        "responses": [
+          { "option": "Take a break and go for a short walk.", "reward": 2 },
+          {
+            "option": "Panic and procrastinate until the last minute.",
+            "reward": -3
+          },
+          {
+            "option": "Make a plan and break the task into smaller steps.",
+            "reward": 3
+          },
+          { "option": "Ignore the deadline and watch TV instead.", "reward": -2 }
+        ]
+      },
+  
+      {
+        "tag": "anger_management",
+        "emotion": "angry",
+        "scenario": "You had an argument with a friend, and you're feeling angry. What do you do?",
+        "responses": [
+          {
+            "option": "Take deep breaths and calm yourself before responding.",
+            "reward": 3
+          },
+          {
+            "option": "Immediately send an angry message without thinking.",
+            "reward": -3
+          },
+          { "option": "Talk to someone else to gain perspective.", "reward": 2 },
+          { "option": "Keep overthinking and get even more upset.", "reward": -2 }
+        ]
+      },
+      {
+        "tag": "work_stress",
+        "emotion": "stress",
+        "scenario": "Your boss gives you extra work when you're already overloaded. How do you handle it?",
+        "responses": [
+          {
+            "option": "Politely communicate your workload and request prioritization.",
+            "reward": 3
+          },
+          {
+            "option": "Work non-stop, sacrificing sleep and personal time.",
+            "reward": -3
+          },
+          {
+            "option": "Complain about it but don’t take any action.",
+            "reward": -2
+          },
+          {
+            "option": "Break the work into smaller, manageable tasks.",
+            "reward": 2
+          }
+        ]
+      },
+      {
+        "tag": "social_anxiety",
+        "emotion": "fear",
+        "scenario": "You're at a social event, and you feel anxious. How do you handle it?",
+        "responses": [
+          {
+            "option": "Find one person to talk to instead of focusing on the crowd.",
+            "reward": 3
+          },
+          {
+            "option": "Leave immediately without trying to engage.",
+            "reward": -2
+          },
+          {
+            "option": "Use a grounding technique like deep breathing.",
+            "reward": 2
+          },
+          { "option": "Stay silent and let your anxiety build up.", "reward": -3 }
+        ]
+      },
+      {
+        "tag": "fear_of_failure",
+        "emotion": "fear",
+        "scenario": "You're afraid to try something new because you might fail. What do you do?",
+        "responses": [
+          {
+            "option": "Accept that failure is part of learning and try anyway.",
+            "reward": 3
+          },
+          { "option": "Avoid the opportunity to prevent failure.", "reward": -3 },
+          { "option": "Seek advice from someone experienced.", "reward": 2 },
+          { "option": "Dwell on the worst possible outcome.", "reward": -2 }
+        ]
+      },
+      {
+        "tag": "sadness_management",
+        "emotion": "sad",
+        "scenario": "You have been feeling down and unmotivated for a while. What do you do?",
+        "responses": [
+          {
+            "option": "Reach out to a close friend or family member.",
+            "reward": 3
+          },
+          {
+            "option": "Stay alone and dwell on negative thoughts.",
+            "reward": -3
+          },
+          {
+            "option": "Engage in an activity you enjoy, like listening to music.",
+            "reward": 2
+          },
+          {
+            "option": "Ignore your feelings and pretend everything is fine.",
+            "reward": -2
+          }
+        ]
+      },
+      {
+        "tag": "loneliness",
+        "emotion": "sad",
+        "scenario": "You've been feeling lonely lately. How do you handle it?",
+        "responses": [
+          {
+            "option": "Join a social group or try meeting new people.",
+            "reward": 3
+          },
+          { "option": "Stay isolated and assume nobody cares.", "reward": -3 },
+          { "option": "Engage in a hobby or activity you enjoy.", "reward": 2 },
+          {
+            "option": "Overthink past relationships and blame yourself.",
+            "reward": -2
+          }
+        ]
+      },
+      {
+        "tag": "happiness_boost",
+        "emotion": "happy",
+        "scenario": "You are in a great mood today! What would you like to do?",
+        "responses": [
+          {
+            "option": "Do something kind for someone else to spread happiness.",
+            "reward": 3
+          },
+          {
+            "option": "Enjoy the moment and engage in a favorite hobby.",
+            "reward": 2
+          },
+          {
+            "option": "Overthink about whether this happiness will last.",
+            "reward": -2
+          },
+          {
+            "option": "Isolate yourself instead of sharing your happiness.",
+            "reward": -3
+          }
+        ]
+      },
+      {
+        "tag": "celebration",
+        "emotion": "happy",
+        "scenario": "You achieved a big goal! How do you celebrate?",
+        "responses": [
+          {
+            "option": "Share your achievement with close friends and family.",
+            "reward": 3
+          },
+          { "option": "Treat yourself to something nice.", "reward": 2 },
+          {
+            "option": "Downplay your success and act like it’s not a big deal.",
+            "reward": -2
+          },
+          {
+            "option": "Worry about what comes next instead of enjoying the moment.",
+            "reward": -3
+          }
+        ]
+      },
+      {
+        "tag": "neutral_mood",
+        "emotion": "neutral",
+        "scenario": "It's a regular day. You feel neither good nor bad. How do you spend your time?",
+        "responses": [
+          {
+            "option": "Try a new activity or hobby to make the day interesting.",
+            "reward": 3
+          },
+          {
+            "option": "Go through your routine without changing anything.",
+            "reward": 1
+          },
+          {
+            "option": "Stay on your phone all day without doing anything productive.",
+            "reward": -2
+          },
+          {
+            "option": "Find something to stress about even if there is none.",
+            "reward": -3
+          }
+        ]
+      },
+      {
+        "tag": "routine",
+        "emotion": "neutral",
+        "scenario": "You don’t have much to do today. How do you make the most of your time?",
+        "responses": [
+          { "option": "Read, exercise, or learn something new.", "reward": 3 },
+          {
+            "option": "Watch TV or scroll through social media all day.",
+            "reward": -2
+          },
+          { "option": "Meet up with a friend or family member.", "reward": 2 },
+          { "option": "Just stay in bed all day.", "reward": -3 }
+        ]
+      },
+      {
+        "tag": "stress_situation",
+        "emotion": "stress",
+        "scenario": "You have a major deadline approaching, but you're feeling overwhelmed. What do you do?",
+        "responses": [
+          { "option": "Take a break and go for a short walk.", "reward": 2 },
+          {
+            "option": "Panic and procrastinate until the last minute.",
+            "reward": -3
+          },
+          {
+            "option": "Make a plan and break the task into smaller steps.",
+            "reward": 3
+          },
+          { "option": "Ignore the deadline and watch TV instead.", "reward": -2 }
+        ]
+      },
+      {
+        "tag": "anger_management",
+        "emotion": "angry",
+        "scenario": "You had an argument with a friend, and you're feeling angry. What do you do?",
+        "responses": [
+          {
+            "option": "Take deep breaths and calm yourself before responding.",
+            "reward": 3
+          },
+          {
+            "option": "Immediately send an angry text without thinking.",
+            "reward": -3
+          },
+          { "option": "Talk to someone else to gain perspective.", "reward": 2 },
+          { "option": "Keep overthinking and get even more upset.", "reward": -2 }
+        ]
+      },
+      {
+        "tag": "social_anxiety",
+        "emotion": "anxious",
+        "scenario": "You're at a social event, and you feel anxious. How do you handle it?",
+        "responses": [
+          {
+            "option": "Find one person to talk to instead of focusing on the crowd.",
+            "reward": 3
+          },
+          {
+            "option": "Leave immediately without trying to engage.",
+            "reward": -2
+          },
+          {
+            "option": "Use a grounding technique like deep breathing.",
+            "reward": 2
+          },
+          { "option": "Stay silent and let your anxiety build up.", "reward": -3 }
+        ]
+      },
+      {
+        "tag": "problem_solving",
+        "emotion": "frustrated",
+        "scenario": "You're stuck on a difficult problem at work/school. What do you do?",
+        "responses": [
+          { "option": "Take a short break and revisit it later.", "reward": 2 },
+          { "option": "Ask for help or seek advice from someone.", "reward": 3 },
+          { "option": "Get frustrated and give up completely.", "reward": -3 },
+          {
+            "option": "Keep trying the same thing without adjusting your approach.",
+            "reward": -2
+          }
+        ]
+      },
+      {
+        "tag": "sadness_recovery",
+        "emotion": "sad",
+        "scenario": "You’ve had a bad day and are feeling really down. What do you do?",
+        "responses": [
+          {
+            "option": "Talk to a friend or family member about your feelings.",
+            "reward": 3
+          },
+          {
+            "option": "Listen to music or engage in a hobby you enjoy.",
+            "reward": 2
+          },
+          {
+            "option": "Dwell on negative thoughts without trying to feel better.",
+            "reward": -2
+          },
+          {
+            "option": "Isolate yourself and refuse to interact with anyone.",
+            "reward": -3
+          }
+        ]
+      },
+      {
+        "tag": "happiness_sharing",
+        "emotion": "happy",
+        "scenario": "You just received great news! How do you celebrate?",
+        "responses": [
+          {
+            "option": "Share the news with close friends and family.",
+            "reward": 3
+          },
+          { "option": "Treat yourself to something you enjoy.", "reward": 2 },
+          {
+            "option": "Downplay your achievement and not share it with anyone.",
+            "reward": -2
+          },
+          {
+            "option": "Compare yourself to others and feel like it’s not good enough.",
+            "reward": -3
+          }
+        ]
+      },
+      {
+        "tag": "fear_management",
+        "emotion": "fear",
+        "scenario": "You're about to give a big presentation, and you're really nervous. What do you do?",
+        "responses": [
+          {
+            "option": "Practice deep breathing and visualize success.",
+            "reward": 3
+          },
+          {
+            "option": "Remind yourself that mistakes are okay and focus on doing your best.",
+            "reward": 2
+          },
+          {
+            "option": "Convince yourself you will fail and refuse to go through with it.",
+            "reward": -3
+          },
+          {
+            "option": "Let your anxiety take over and avoid practicing altogether.",
+            "reward": -2
+          }
+        ]
+      },
+      {
+        "tag": "neutral_mindset",
+        "emotion": "neutral",
+        "scenario": "You have a free day with no plans. What do you do?",
+        "responses": [
+          { "option": "Use the time to relax and recharge.", "reward": 3 },
+          {
+            "option": "Try something new, like a hobby or activity.",
+            "reward": 2
+          },
+          {
+            "option": "Spend the whole day doing nothing and feeling unproductive.",
+            "reward": -2
+          },
+          {
+            "option": "Overthink about how you should be doing more.",
+            "reward": -3
+          }
+        ]
+      },
+      {
+        "tag": "stress_situation",
+        "emotion": "stress",
+        "scenario": "You have a major deadline approaching, but you're feeling overwhelmed. What do you do?",
+        "responses": [
+          { "option": "Take a break and go for a short walk.", "reward": 2 },
+          {
+            "option": "Panic and procrastinate until the last minute.",
+            "reward": -3
+          },
+          {
+            "option": "Make a plan and break the task into smaller steps.",
+            "reward": 3
+          },
+          { "option": "Ignore the deadline and watch TV instead.", "reward": -2 }
+        ]
+      },
+      {
+        "tag": "work_stress",
+        "emotion": "stress",
+        "scenario": "You have multiple tasks piling up at work, and you feel overwhelmed. What do you do?",
+        "responses": [
+          {
+            "option": "Prioritize the most urgent tasks and focus on them one by one.",
+            "reward": 3
+          },
+          {
+            "option": "Try to multitask everything at once, leading to more stress.",
+            "reward": -2
+          },
+          {
+            "option": "Ask for help or delegate some tasks if possible.",
+            "reward": 2
+          },
+          { "option": "Give up and stop working altogether.", "reward": -3 }
+        ]
+      },
+      {
+        "tag": "anger_management",
+        "emotion": "angry",
+        "scenario": "You had an argument with a friend, and you're feeling angry. What do you do?",
+        "responses": [
+          {
+            "option": "Take deep breaths and calm yourself before responding.",
+            "reward": 3
+          },
+          {
+            "option": "Immediately send an angry text without thinking.",
+            "reward": -3
+          },
+          { "option": "Talk to someone else to gain perspective.", "reward": 2 },
+          { "option": "Keep overthinking and get even more upset.", "reward": -2 }
+        ]
+      },
+      {
+        "tag": "traffic_anger",
+        "emotion": "angry",
+        "scenario": "You're stuck in heavy traffic, and it's making you angry. How do you react?",
+        "responses": [
+          {
+            "option": "Listen to calming music or a podcast to distract yourself.",
+            "reward": 3
+          },
+          {
+            "option": "Honk aggressively and shout at other drivers.",
+            "reward": -3
+          },
+          {
+            "option": "Remind yourself that getting angry won't change the situation.",
+            "reward": 2
+          },
+          { "option": "Keep complaining about how unfair it is.", "reward": -2 }
+        ]
+      },
+      {
+        "tag": "social_anxiety",
+        "emotion": "anxious",
+        "scenario": "You're at a social event, and you feel anxious. How do you handle it?",
+        "responses": [
+          {
+            "option": "Find one person to talk to instead of focusing on the crowd.",
+            "reward": 3
+          },
+          {
+            "option": "Leave immediately without trying to engage.",
+            "reward": -2
+          },
+          {
+            "option": "Use a grounding technique like deep breathing.",
+            "reward": 2
+          },
+          { "option": "Stay silent and let your anxiety build up.", "reward": -3 }
+        ]
+      },
+      {
+        "tag": "public_speaking_fear",
+        "emotion": "fear",
+        "scenario": "You're about to give a speech in front of a large audience, and you're extremely nervous. What do you do?",
+        "responses": [
+          {
+            "option": "Practice deep breathing and remind yourself of your preparation.",
+            "reward": 3
+          },
+          { "option": "Panic and convince yourself you'll fail.", "reward": -3 },
+          {
+            "option": "Focus on one friendly face in the audience for support.",
+            "reward": 2
+          },
+          {
+            "option": "Avoid eye contact and rush through your speech as fast as possible.",
+            "reward": -2
+          }
+        ]
+      },
+      {
+        "tag": "fear_of_failure",
+        "emotion": "fear",
+        "scenario": "You're afraid of failing an important exam. How do you handle the fear?",
+        "responses": [
+          { "option": "Create a study plan and stick to it.", "reward": 3 },
+          {
+            "option": "Avoid studying because thinking about it stresses you out.",
+            "reward": -3
+          },
+          {
+            "option": "Seek advice or tutoring to help understand difficult topics.",
+            "reward": 2
+          },
+          {
+            "option": "Keep telling yourself that you're not smart enough to pass.",
+            "reward": -2
+          }
+        ]
+      },
+      {
+        "tag": "sadness_recovery",
+        "emotion": "sad",
+        "scenario": "You’ve had a bad day and are feeling really down. What do you do?",
+        "responses": [
+          {
+            "option": "Talk to a friend or family member about your feelings.",
+            "reward": 3
+          },
+          {
+            "option": "Listen to music or engage in a hobby you enjoy.",
+            "reward": 2
+          },
+          {
+            "option": "Dwell on negative thoughts without trying to feel better.",
+            "reward": -2
+          },
+          {
+            "option": "Isolate yourself and refuse to interact with anyone.",
+            "reward": -3
+          }
+        ]
+      },
+      {
+        "tag": "loss_sadness",
+        "emotion": "sad",
+        "scenario": "You recently lost something or someone important to you. How do you cope?",
+        "responses": [
+          {
+            "option": "Allow yourself to grieve and express your emotions.",
+            "reward": 3
+          },
+          {
+            "option": "Suppress your emotions and refuse to acknowledge them.",
+            "reward": -3
+          },
+          {
+            "option": "Seek support from friends, family, or a counselor.",
+            "reward": 2
+          },
+          {
+            "option": "Completely shut down and refuse to function.",
+            "reward": -2
+          }
+        ]
+      },
+      {
+        "tag": "happiness_sharing",
+        "emotion": "happy",
+        "scenario": "You just received great news! How do you celebrate?",
+        "responses": [
+          {
+            "option": "Share the news with close friends and family.",
+            "reward": 3
+          },
+          { "option": "Treat yourself to something you enjoy.", "reward": 2 },
+          {
+            "option": "Downplay your achievement and not share it with anyone.",
+            "reward": -2
+          },
+          {
+            "option": "Compare yourself to others and feel like it’s not good enough.",
+            "reward": -3
+          }
+        ]
+      },
+      {
+        "tag": "neutral_mindset",
+        "emotion": "neutral",
+        "scenario": "You have a free day with no plans. What do you do?",
+        "responses": [
+          { "option": "Use the time to relax and recharge.", "reward": 3 },
+          {
+            "option": "Try something new, like a hobby or activity.",
+            "reward": 2
+          },
+          {
+            "option": "Spend the whole day doing nothing and feeling unproductive.",
+            "reward": -2
+          },
+          {
+            "option": "Overthink about how you should be doing more.",
+            "reward": -3
+          }
+        ]
+      },
+      {
+        "tag": "fear_of_rejection",
+        "emotion": "fear",
+        "scenario": "You want to ask someone out on a date, but you're afraid they might reject you. What do you do?",
+        "responses": [
+          { "option": "Take the risk and ask them out anyway.", "reward": 3 },
+          {
+            "option": "Avoid asking them out to protect yourself from rejection.",
+            "reward": -3
+          },
+          {
+            "option": "Talk to a friend for encouragement before making a decision.",
+            "reward": 2
+          },
+          {
+            "option": "Overthink the situation and convince yourself it’s not worth trying.",
+            "reward": -2
+          }
+        ]
+      },
+      {
+        "tag": "burnout",
+        "emotion": "stress",
+        "scenario": "You’ve been working long hours and feel completely drained. How do you handle it?",
+        "responses": [
+          { "option": "Take a day off to rest and recharge.", "reward": 3 },
+          {
+            "option": "Push through and keep working despite feeling exhausted.",
+            "reward": -3
+          },
+          {
+            "option": "Talk to your boss about reducing your workload.",
+            "reward": 2
+          },
+          {
+            "option": "Ignore your feelings and continue working until you collapse.",
+            "reward": -2
+          }
+        ]
+      },
+      {
+        "tag": "jealousy",
+        "emotion": "anger",
+        "scenario": "You feel jealous because your partner is spending a lot of time with someone else. What do you do?",
+        "responses": [
+          {
+            "option": "Communicate your feelings calmly and honestly with your partner.",
+            "reward": 3
+          },
+          {
+            "option": "Accuse your partner of cheating without evidence.",
+            "reward": -3
+          },
+          {
+            "option": "Reflect on why you feel jealous and work on building trust.",
+            "reward": 2
+          },
+          {
+            "option": "Withdraw emotionally and avoid talking about it.",
+            "reward": -2
+          }
+        ]
+      },
+      {
+        "tag": "financial_stress",
+        "emotion": "stress",
+        "scenario": "You’re struggling to pay your bills and feel overwhelmed by financial pressure. What do you do?",
+        "responses": [
+          {
+            "option": "Create a budget and prioritize essential expenses.",
+            "reward": 3
+          },
+          { "option": "Ignore the problem and hope it goes away.", "reward": -3 },
+          {
+            "option": "Seek advice from a financial advisor or trusted friend.",
+            "reward": 2
+          },
+          {
+            "option": "Spend more money to distract yourself from the stress.",
+            "reward": -2
+          }
+        ]
+      },
+      {
+        "tag": "unappreciated",
+        "emotion": "sad",
+        "scenario": "You feel like your efforts at work or in a relationship are going unnoticed. How do you handle it?",
+        "responses": [
+          {
+            "option": "Communicate your feelings and ask for recognition.",
+            "reward": 3
+          },
+          {
+            "option": "Stop putting in effort and become resentful.",
+            "reward": -3
+          },
+          {
+            "option": "Reflect on your own achievements and validate yourself.",
+            "reward": 2
+          },
+          { "option": "Compare yourself to others and feel worse.", "reward": -2 }
+        ]
+      },
+      {
+        "tag": "public_speaking_fear",
+        "emotion": "fear",
+        "scenario": "You’re about to give a presentation, and the thought of speaking in front of a crowd terrifies you. What do you do?",
+        "responses": [
+          {
+            "option": "Practice deep breathing and visualize a successful presentation.",
+            "reward": 3
+          },
+          {
+            "option": "Cancel the presentation to avoid the anxiety.",
+            "reward": -3
+          },
+          {
+            "option": "Practice in front of a friend or mirror to build confidence.",
+            "reward": 2
+          },
+          {
+            "option": "Let your fear take over and avoid preparing.",
+            "reward": -2
+          }
+        ]
+      },
+      {
+        "tag": "overwhelmed",
+        "emotion": "stress",
+        "scenario": "You have too many responsibilities at work, home, and in your personal life. How do you handle it?",
+        "responses": [
+          {
+            "option": "Make a list and prioritize tasks to tackle them one at a time.",
+            "reward": 3
+          },
+          { "option": "Ignore everything and procrastinate.", "reward": -3 },
+          { "option": "Ask for help or delegate some tasks.", "reward": 2 },
+          {
+            "option": "Push yourself to do everything at once, leading to burnout.",
+            "reward": -2
+          }
+        ]
+      },
+      {
+        "tag": "feeling_stuck",
+        "emotion": "sad",
+        "scenario": "You feel like you’re not making progress in life and are stuck in a rut. What do you do?",
+        "responses": [
+          {
+            "option": "Set small, achievable goals to regain momentum.",
+            "reward": 3
+          },
+          {
+            "option": "Give up and stop trying to improve your situation.",
+            "reward": -3
+          },
+          {
+            "option": "Talk to a mentor or therapist for guidance.",
+            "reward": 2
+          },
+          {
+            "option": "Blame others for your situation and avoid taking action.",
+            "reward": -2
+          }
+        ]
+      },
+      {
+        "tag": "weekend_loneliness",
+        "emotion": "sad",
+        "scenario": "It’s the weekend, and you’re feeling lonely because all your friends are busy. What do you do?",
+        "responses": [
+          {
+            "option": "Reach out to a friend or family member to chat or meet up.",
+            "reward": 3
+          },
+          {
+            "option": "Stay alone and dwell on how lonely you feel.",
+            "reward": -3
+          },
+          {
+            "option": "Engage in a solo activity you enjoy, like reading or painting.",
+            "reward": 2
+          },
+          {
+            "option": "Scroll through social media and compare your life to others.",
+            "reward": -2
+          }
+        ]
+      },
+      {
+        "tag": "line_cutter",
+        "emotion": "angry",
+        "scenario": "Someone cuts in front of you in a long line, and it makes you furious. How do you react?",
+        "responses": [
+          {
+            "option": "Calmly ask them to go to the back of the line.",
+            "reward": 3
+          },
+          { "option": "Yell at them and cause a scene.", "reward": -3 },
+          {
+            "option": "Take a deep breath and let it go to avoid conflict.",
+            "reward": 2
+          },
+          {
+            "option": "Stay silent but fume about it for the rest of the day.",
+            "reward": -2
+          }
+        ]
+      },
+      {
+        "tag": "friend_compliment",
+        "emotion": "happy",
+        "scenario": "A close friend gives you a heartfelt compliment, and it makes your day. What do you do?",
+        "responses": [
+          {
+            "option": "Thank them sincerely and return the kindness with a compliment.",
+            "reward": 3
+          },
+          {
+            "option": "Downplay the compliment and act like it’s no big deal.",
+            "reward": -2
+          },
+          {
+            "option": "Share your happiness with others by spreading positivity.",
+            "reward": 2
+          },
+          {
+            "option": "Overthink why they complimented you and doubt their sincerity.",
+            "reward": -3
+          }
+        ]
+      },
+      {
+        "tag": "household_stress",
+        "emotion": "stress",
+        "scenario": "You have a mountain of household chores to do, and it feels overwhelming. What do you do?",
+        "responses": [
+          { "option": "Make a list and tackle one task at a time.", "reward": 3 },
+          {
+            "option": "Ignore the chores and procrastinate until it’s worse.",
+            "reward": -3
+          },
+          {
+            "option": "Ask a family member or friend to help you out.",
+            "reward": 2
+          },
+          {
+            "option": "Try to do everything at once and burn yourself out.",
+            "reward": -2
+          }
+        ]
+      },
+      {
+        "tag": "rainy_day_boredom",
+        "emotion": "neutral",
+        "scenario": "It’s a rainy day, and you have no plans. You feel neither good nor bad, just bored. What do you do?",
+        "responses": [
+          {
+            "option": "Try a new indoor hobby, like baking or painting.",
+            "reward": 3
+          },
+          {
+            "option": "Spend the whole day scrolling through your phone.",
+            "reward": -2
+          },
+          {
+            "option": "Catch up on a book or watch a movie you’ve been meaning to see.",
+            "reward": 2
+          },
+          { "option": "Complain about the weather and do nothing.", "reward": -3 }
+        ]
+      },
+      {
+        "tag": "nighttime_fear",
+        "emotion": "fear",
+        "scenario": "You hear a strange noise in the middle of the night, and it scares you. What do you do?",
+        "responses": [
+          { "option": "Take a deep breath and investigate calmly.", "reward": 3 },
+          { "option": "Panic and hide under the covers.", "reward": -3 },
+          {
+            "option": "Call a family member or friend to help you check.",
+            "reward": 2
+          },
+          {
+            "option": "Convince yourself it’s something dangerous and stay awake all night.",
+            "reward": -2
+          }
+        ]
+      },
+      {
+        "tag": "pet_loss",
+        "emotion": "sad",
+        "scenario": "Your beloved pet has passed away, and you’re feeling heartbroken. What do you do?",
+        "responses": [
+          {
+            "option": "Create a small memorial or keepsake to honor their memory.",
+            "reward": 3
+          },
+          {
+            "option": "Suppress your emotions and pretend you’re fine.",
+            "reward": -3
+          },
+          {
+            "option": "Talk to a friend or family member about how you’re feeling.",
+            "reward": 2
+          },
+          {
+            "option": "Isolate yourself and refuse to talk about it.",
+            "reward": -2
+          }
+        ]
+      },
+      {
+        "tag": "insult",
+        "emotion": "angry",
+        "scenario": "Someone makes a rude comment about you in front of others. How do you react?",
+        "responses": [
+          {
+            "option": "Respond calmly and assertively without escalating the situation.",
+            "reward": 3
+          },
+          { "option": "Yell back at them and make a scene.", "reward": -3 },
+          {
+            "option": "Walk away and cool off before addressing it later.",
+            "reward": 2
+          },
+          {
+            "option": "Hold onto the anger and let it ruin your day.",
+            "reward": -2
+          }
+        ]
+      },
+      {
+        "tag": "surprise_gift",
+        "emotion": "happy",
+        "scenario": "Someone surprises you with a thoughtful gift, and it makes you incredibly happy. What do you do?",
+        "responses": [
+          {
+            "option": "Express your gratitude and give them a heartfelt thank-you.",
+            "reward": 3
+          },
+          {
+            "option": "Downplay your happiness and act like it’s no big deal.",
+            "reward": -2
+          },
+          {
+            "option": "Pay it forward by doing something kind for someone else.",
+            "reward": 2
+          },
+          {
+            "option": "Overthink why they gave you the gift and doubt their intentions.",
+            "reward": -3
+          }
+        ]
+      },
+      {
+        "tag": "broken_appliance",
+        "emotion": "stress",
+        "scenario": "Your washing machine breaks down, and you have a pile of laundry to do. What do you do?",
+        "responses": [
+          {
+            "option": "Call a repair service and find a temporary solution, like a laundromat.",
+            "reward": 3
+          },
+          {
+            "option": "Panic and feel overwhelmed by the situation.",
+            "reward": -3
+          },
+          {
+            "option": "Ask a friend or neighbor if you can use their machine.",
+            "reward": 2
+          },
+          {
+            "option": "Ignore the problem and let the laundry pile up.",
+            "reward": -2
+          }
+        ]
+      },
+      {
+        "tag": "power_outage",
+        "emotion": "fear",
+        "scenario": "There’s a sudden power outage at night, and you’re afraid of the dark. What do you do?",
+        "responses": [
+          {
+            "option": "Use a flashlight or candle and focus on staying calm.",
+            "reward": 3
+          },
+          {
+            "option": "Panic and call someone to come over immediately.",
+            "reward": -3
+          },
+          {
+            "option": "Distract yourself with a book or music until the power returns.",
+            "reward": 2
+          },
+          {
+            "option": "Convince yourself something bad will happen and stay scared.",
+            "reward": -2
+          }
+        ]
+      },
+      {
+        "tag": "friend_moves_away",
+        "emotion": "sad",
+        "scenario": "Your close friend is moving to another city, and you’re feeling sad about the distance. What do you do?",
+        "responses": [
+          {
+            "option": "Plan a farewell gathering to celebrate your friendship.",
+            "reward": 3
+          },
+          {
+            "option": "Avoid saying goodbye to make it easier on yourself.",
+            "reward": -3
+          },
+          { "option": "Stay in touch through calls and messages.", "reward": 2 },
+          { "option": "Dwell on the sadness and isolate yourself.", "reward": -2 }
+        ]
+      },
+      {
+        "tag": "stolen_credit",
+        "emotion": "angry",
+        "scenario": "A co-worker presents your idea as their own during a meeting. How do you react?",
+        "responses": [
+          {
+            "option": "Calmly address the issue with your co-worker after the meeting.",
+            "reward": 3
+          },
+          {
+            "option": "Confront them angrily in front of everyone.",
+            "reward": -3
+          },
+          {
+            "option": "Document your work and discuss it with your manager privately.",
+            "reward": 2
+          },
+          {
+            "option": "Stay silent but resent them for the rest of the day.",
+            "reward": -2
+          }
+        ]
+      },
+      {
+        "tag": "random_kindness",
+        "emotion": "happy",
+        "scenario": "A stranger does something kind for you, like paying for your coffee. How do you respond?",
+        "responses": [
+          {
+            "option": "Thank them sincerely and pay it forward by helping someone else.",
+            "reward": 3
+          },
+          { "option": "Feel awkward and downplay the gesture.", "reward": -2 },
+          {
+            "option": "Share the story with friends to spread positivity.",
+            "reward": 2
+          },
+          {
+            "option": "Overthink why they did it and doubt their intentions.",
+            "reward": -3
+          }
+        ]
+      },
+      {
+        "tag": "computer_crash",
+        "emotion": "stress",
+        "scenario": "Your computer crashes, and you lose hours of unsaved work. What do you do?",
+        "responses": [
+          {
+            "option": "Take a deep breath and start over, saving frequently this time.",
+            "reward": 3
+          },
+          { "option": "Panic and give up on the task entirely.", "reward": -3 },
+          {
+            "option": "Use recovery tools or ask for technical help.",
+            "reward": 2
+          },
+          {
+            "option": "Blame yourself and let the stress ruin your day.",
+            "reward": -2
+          }
+        ]
+      },
+      {
+        "tag": "lazy_sunday",
+        "emotion": "neutral",
+        "scenario": "It’s a lazy Sunday, and you have no plans. You feel neither good nor bad. What do you do?",
+        "responses": [
+          {
+            "option": "Use the day to relax and recharge for the week ahead.",
+            "reward": 3
+          },
+          {
+            "option": "Spend the day scrolling through social media mindlessly.",
+            "reward": -2
+          },
+          {
+            "option": "Try a new recipe or hobby to make the day interesting.",
+            "reward": 2
+          },
+          {
+            "option": "Overthink how you should be doing something more productive.",
+            "reward": -3
+          }
+        ]
+      },
+      {
+        "tag": "spider_fear",
+        "emotion": "fear",
+        "scenario": "You see a spider in your room, and you’re terrified of spiders. What do you do?",
+        "responses": [
+          {
+            "option": "Calmly trap it in a cup and release it outside.",
+            "reward": 3
+          },
+          { "option": "Scream and run out of the room.", "reward": -3 },
+          { "option": "Ask someone else to handle it for you.", "reward": 2 },
+          {
+            "option": "Stay frozen in fear and avoid the room entirely.",
+            "reward": -2
+          }
+        ]
+      },
+      {
+        "tag": "job_loss",
+        "emotion": "sad",
+        "scenario": "You’ve been laid off from your job unexpectedly. How do you cope?",
+        "responses": [
+          {
+            "option": "Reflect on your strengths and start applying for new opportunities.",
+            "reward": 3
+          },
+          {
+            "option": "Isolate yourself and dwell on feelings of worthlessness.",
+            "reward": -3
+          },
+          {
+            "option": "Reach out to your network for support and advice.",
+            "reward": 2
+          },
+          {
+            "option": "Blame others and refuse to take constructive steps.",
+            "reward": -2
+          }
+        ]
+      },
+      {
+        "tag": "unfair_criticism",
+        "emotion": "angry",
+        "scenario": "Your boss criticizes you unfairly in front of the team. How do you react?",
+        "responses": [
+          {
+            "option": "Request a private meeting to discuss the feedback calmly.",
+            "reward": 3
+          },
+          {
+            "option": "Snap back defensively and escalate the conflict.",
+            "reward": -3
+          },
+          {
+            "option": "Vent to a trusted colleague to release frustration.",
+            "reward": 2
+          },
+          { "option": "Hold a grudge and let it affect your work.", "reward": -2 }
+        ]
+      },
+      {
+        "tag": "friend_reunion",
+        "emotion": "happy",
+        "scenario": "An old friend reaches out to reconnect, and it brightens your day. What do you do?",
+        "responses": [
+          {
+            "option": "Plan a meetup to catch up and strengthen the bond.",
+            "reward": 3
+          },
+          {
+            "option": "Ignore their message due to past misunderstandings.",
+            "reward": -3
+          },
+          {
+            "option": "Share memories and express gratitude for their outreach.",
+            "reward": 2
+          },
+          {
+            "option": "Overthink their intentions and delay responding.",
+            "reward": -2
+          }
+        ]
+      },
+      {
+        "tag": "exam_stress",
+        "emotion": "stress",
+        "scenario": "You have an exam tomorrow but haven’t studied enough. What do you do?",
+        "responses": [
+          {
+            "option": "Focus on key topics and create a study schedule for the night.",
+            "reward": 3
+          },
+          {
+            "option": "Panic and give up, deciding to skip the exam.",
+            "reward": -3
+          },
+          {
+            "option": "Ask a classmate for notes or clarification on tough topics.",
+            "reward": 2
+          },
+          {
+            "option": "Distract yourself with games or social media.",
+            "reward": -2
+          }
+        ]
+      },
+      {
+        "tag": "waiting_line",
+        "emotion": "neutral",
+        "scenario": "You’re stuck in a long line at the grocery store. How do you pass the time?",
+        "responses": [
+          {
+            "option": "Use the time to people-watch or plan your week.",
+            "reward": 3
+          },
+          { "option": "Complain loudly about the wait to others.", "reward": -3 },
+          {
+            "option": "Listen to a podcast or music to stay relaxed.",
+            "reward": 2
+          },
+          { "option": "Overthink how much time you’re wasting.", "reward": -2 }
+        ]
+      },
+      {
+        "tag": "wild_animal",
+        "emotion": "fear",
+        "scenario": "You’re hiking and spot a bear in the distance. What do you do?",
+        "responses": [
+          {
+            "option": "Stay calm, back away slowly, and follow safety guidelines.",
+            "reward": 3
+          },
+          {
+            "option": "Scream and run, triggering the bear’s chase instinct.",
+            "reward": -3
+          },
+          { "option": "Use bear spray or make noise to deter it.", "reward": 2 },
+          { "option": "Freeze in fear and do nothing.", "reward": -2 }
+        ]
+      },
+      {
+        "tag": "broken_heirloom",
+        "emotion": "sad",
+        "scenario": "You accidentally break a family heirloom that holds sentimental value. How do you cope?",
+        "responses": [
+          {
+            "option": "Apologize sincerely and try to repair or preserve the pieces.",
+            "reward": 3
+          },
+          {
+            "option": "Hide the broken item and pretend nothing happened.",
+            "reward": -3
+          },
+          {
+            "option": "Talk to a family member about how you’re feeling.",
+            "reward": 2
+          },
+          {
+            "option": "Dwell on the mistake and feel guilty for days.",
+            "reward": -2
+          }
+        ]
+      },
+      {
+        "tag": "stolen_parking",
+        "emotion": "angry",
+        "scenario": "Someone steals the parking spot you’ve been waiting for. How do you react?",
+        "responses": [
+          { "option": "Take a deep breath and find another spot.", "reward": 3 },
+          { "option": "Honk aggressively and yell at the driver.", "reward": -3 },
+          {
+            "option": "Let it go and remind yourself it’s not worth the stress.",
+            "reward": 2
+          },
+          {
+            "option": "Stay angry and let it ruin your mood for hours.",
+            "reward": -2
+          }
+        ]
+      },
+      {
+        "tag": "work_promotion",
+        "emotion": "happy",
+        "scenario": "You’ve just been promoted at work! How do you celebrate?",
+        "responses": [
+          {
+            "option": "Share the news with loved ones and celebrate together.",
+            "reward": 3
+          },
+          {
+            "option": "Downplay the promotion and focus on the added responsibilities.",
+            "reward": -2
+          },
+          {
+            "option": "Treat yourself to something special to mark the occasion.",
+            "reward": 2
+          },
+          {
+            "option": "Worry about whether you’ll live up to expectations.",
+            "reward": -3
+          }
+        ]
+      },
+      {
+        "tag": "sick_child",
+        "emotion": "stress",
+        "scenario": "Your child is sick, and you’re worried about their health. What do you do?",
+        "responses": [
+          {
+            "option": "Stay calm, monitor their symptoms, and consult a doctor.",
+            "reward": 3
+          },
+          {
+            "option": "Panic and rush to the emergency room immediately.",
+            "reward": -3
+          },
+          { "option": "Ask a family member or friend for support.", "reward": 2 },
+          {
+            "option": "Ignore the symptoms and hope they get better on their own.",
+            "reward": -2
+          }
+        ]
+      },
+      {
+        "tag": "rainy_afternoon",
+        "emotion": "neutral",
+        "scenario": "It’s a rainy afternoon, and you have no plans. You feel neither good nor bad. What do you do?",
+        "responses": [
+          {
+            "option": "Use the time to relax with a book or movie.",
+            "reward": 3
+          },
+          {
+            "option": "Complain about the weather and do nothing.",
+            "reward": -2
+          },
+          {
+            "option": "Try a new indoor activity, like baking or painting.",
+            "reward": 2
+          },
+          { "option": "Overthink how unproductive you’re being.", "reward": -3 }
+        ]
+      },
+      {
+        "tag": "strange_noise",
+        "emotion": "fear",
+        "scenario": "You hear a strange noise outside your house late at night. What do you do?",
+        "responses": [
+          {
+            "option": "Stay calm, lock the doors, and check security cameras if available.",
+            "reward": 3
+          },
+          { "option": "Panic and call the police immediately.", "reward": -3 },
+          {
+            "option": "Ask a family member or neighbor to check with you.",
+            "reward": 2
+          },
+          {
+            "option": "Convince yourself it’s something dangerous and stay awake all night.",
+            "reward": -2
+          }
+        ]
+      },
+      {
+          "tag": "missed_event",
+          "emotion": "sad",
+          "scenario": "You miss an important family event due to work or other commitments. How do you cope?",
+          "responses": [
+            { "option": "Apologize to your family and plan a special time to make it up to them.", "reward": 3 },
+            { "option": "Feel guilty and avoid talking to your family about it.", "reward": -3 },
+            { "option": "Send a thoughtful gift or message to show you care.", "reward": 2 },
+            { "option": "Dwell on the missed opportunity and feel sorry for yourself.", "reward": -2 }
+          ]
+        },
+        {
+          "tag": "loud_party",
+          "emotion": "angry",
+          "scenario": "Your neighbor is throwing a loud party late at night, and you can’t sleep. How do you react?",
+          "responses": [
+            { "option": "Politely ask them to lower the volume.", "reward": 3 },
+            { "option": "Yell at them and threaten to call the police.", "reward": -3 },
+            { "option": "Use earplugs or white noise to block out the sound.", "reward": 2 },
+            { "option": "Stay angry and lose sleep over it.", "reward": -2 }
+          ]
+        },
+        {
+          "tag": "random_compliment",
+          "emotion": "happy",
+          "scenario": "A stranger compliments your outfit or appearance, and it makes your day. What do you do?",
+          "responses": [
+            { "option": "Thank them sincerely and return the kindness with a compliment.", "reward": 3 },
+            { "option": "Feel awkward and downplay the compliment.", "reward": -2 },
+            { "option": "Share the compliment with a friend to spread positivity.", "reward": 2 },
+            { "option": "Overthink why they complimented you and doubt their sincerity.", "reward": -3 }
+          ]
+        },
+        {
+          "tag": "broken_appliance",
+          "emotion": "stress",
+          "scenario": "Your washing machine breaks down, and you have a pile of laundry to do. What do you do?",
+          "responses": [
+            { "option": "Call a repair service and find a temporary solution, like a laundromat.", "reward": 3 },
+            { "option": "Panic and feel overwhelmed by the situation.", "reward": -3 },
+            { "option": "Ask a friend or neighbor if you can use their machine.", "reward": 2 },
+            { "option": "Ignore the problem and let the laundry pile up.", "reward": -2 }
+          ]
+        },
+        {
+          "tag": "quiet_morning",
+          "emotion": "neutral",
+          "scenario": "It’s a quiet morning, and you have no plans. You feel neither good nor bad. What do you do?",
+          "responses": [
+            { "option": "Use the time to meditate or journal.", "reward": 3 },
+            { "option": "Spend the morning scrolling through your phone.", "reward": -2 },
+            { "option": "Go for a walk or enjoy a cup of coffee in peace.", "reward": 2 },
+            { "option": "Overthink how you should be doing something more productive.", "reward": -3 }
+          ]
+        },
+        {
+          "tag": "nighttime_fear",
+          "emotion": "fear",
+          "scenario": "You hear a strange noise in the middle of the night, and it scares you. What do you do?",
+          "responses": [
+            { "option": "Take a deep breath and investigate calmly.", "reward": 3 },
+            { "option": "Panic and hide under the covers.", "reward": -3 },
+            { "option": "Call a family member or friend to help you check.", "reward": 2 },
+            { "option": "Convince yourself it’s something dangerous and stay awake all night.", "reward": -2 }
+          ]
+        }
+    ]
+  }
+  
