@@ -280,14 +280,15 @@ export const audioReply = async(req, res) => {
                 }
 
 
-                if (!uploaded_data_type || !file_paths) {
-                    return res.status(400).json({ error: "uploaded_data_type and file_paths are required." });
-                }
+
 
                 const emotion = "happy"; //await predictEmotion(uploaded_data_type, file_paths); change when the prediction is ready
                 const uploaded_data_type = "audio";
                 const file_paths = outputPath //" the path should be changed when saved and added to the project github";
                 console.log(outputPath);
+                if (!uploaded_data_type || !file_paths) {
+                    return res.status(400).json({ error: "uploaded_data_type and file_paths are required." });
+                }
 
                 const newEmotion = await ExtractedEmotion.create({
                     session_id: sessionId,
