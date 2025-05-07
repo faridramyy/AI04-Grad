@@ -35,8 +35,8 @@ app.use("/api/stress-scenarios", stressScenarioRoutes);
 
 app.use("/api/therapy-reply", therapyReplyRoutes);
 
-// connectDB().then(() => {
-app.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
+connectDB().then(() => {
+    app.listen(port, () => {
+        console.log(`Server running on http://localhost:${port}`);
+    });
 });
-// });
