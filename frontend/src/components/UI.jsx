@@ -273,6 +273,8 @@ export const UI = ({ hidden, ...props }) => {
               />
             </svg>
           </button>
+      
+      
         </div>
 
         {/* Bottom Input and Controls */}

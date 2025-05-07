@@ -1,12 +1,19 @@
 import { useState, useRef, useEffect } from "react";
+import SettingsModal from "./SettingsModal"; // <<== Import it
 
 export default function ProfilePic() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false); // <<== new state
   const menuRef = useRef(null);
   const buttonRef = useRef(null);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+
+  const openSettings = () => {
+    setIsSettingsOpen(true);
+    setIsMenuOpen(false); // Close menu when opening settings
   };
 
   // Close menu when clicking outside
@@ -35,7 +42,6 @@ export default function ProfilePic() {
         className="w-10 h-10 rounded-full bg-pink-500 flex items-center justify-center text-white shadow-md hover:bg-pink-600 focus:outline-none"
         aria-label="Profile menu"
       >
-        {/* FontAwesome User Icon */}
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 448 512"
@@ -49,15 +55,14 @@ export default function ProfilePic() {
       {isMenuOpen && (
         <div
           ref={menuRef}
-          className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border "
+          className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border"
         >
           <button
             className="flex items-center w-full text-left px-4 py-2 text-sm hover:bg-pink-50"
             onClick={() => console.log("Dashboard clicked")}
           >
-            {/* Dashboard Icon */}
             <svg
-              className="w-4 h-4 mr-2 "
+              className="w-4 h-4 mr-2"
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
@@ -70,11 +75,10 @@ export default function ProfilePic() {
 
           <button
             className="flex items-center w-full text-left px-4 py-2 text-sm hover:bg-pink-50"
-            onClick={() => console.log("Settings clicked")}
+            onClick={openSettings}
           >
-            {/* Settings Icon */}
             <svg
-              className="w-4 h-4 mr-2 "
+              className="w-4 h-4 mr-2"
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
@@ -103,6 +107,10 @@ export default function ProfilePic() {
             Log out
           </button>
         </div>
+      )}
+
+      {isSettingsOpen && (
+        <SettingsModal onClose={() => setIsSettingsOpen(false)} />
       )}
     </div>
   );
