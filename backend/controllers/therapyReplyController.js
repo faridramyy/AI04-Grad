@@ -196,7 +196,7 @@ export const audioReply = async (req, res) => {
     const pythonScriptPath = path.join(
       process.cwd(),
       "utilities",
-      "audioToText.py"
+      "audioOrVideoToText.py"
     );
     const pythonExecutable =
       process.platform === "win32" ? "python" : "python3";
@@ -251,23 +251,19 @@ export const audioReply = async (req, res) => {
         res.send({ messages });
       } catch (error) {
         console.error("Error after transcription:", error);
-        res
-          .status(500)
-          .send({
-            messages: [],
-            error: "Failed to process transcription response",
-          });
+        res.status(500).send({
+          messages: [],
+          error: "Failed to process transcription response",
+        });
       }
     });
 
     python.on("error", (error) => {
       console.error("Failed to start Python process:", error.message);
-      res
-        .status(500)
-        .json({
-          error: "Failed to start Python script",
-          details: error.message,
-        });
+      res.status(500).json({
+        error: "Failed to start Python script",
+        details: error.message,
+      });
     });
   } catch (error) {
     console.error("Unexpected error:", error);
@@ -278,5 +274,132 @@ export const audioReply = async (req, res) => {
 };
 
 export const videoReply = async (req, res) => {
-  res.send({ messages: [{ text: "Video feature not implemented yet." }] });
+  try {
+    const file = req.file;
+    const duration = req.body.duration;
+
+    // Validate file
+    if (!file || file.size < 500) {
+      return res
+        .status(400)
+        .json({ error: "Uploaded file is empty or too small." });
+    }
+    if (!["video/webm", "video/mp4"].includes(file.mimetype)) {
+      return res.status(400).json({ error: "Unsupported file type." });
+    }
+
+    console.log(
+      `Uploaded file: ${file.originalname}, size: ${file.size} bytes`
+    );
+    const inputPath = file.path;
+    const outputPath = inputPath.replace(path.extname(inputPath), ".mp4");
+
+    // Convert video to MP4
+    await new Promise((resolve, reject) => {
+      const command = `ffmpeg -y -i "${inputPath}" "${outputPath}"`;
+      exec(command, { timeout: 60000 }, (error, stdout, stderr) => {
+        if (error) {
+          console.error("FFmpeg conversion error:", stderr || error.message);
+          return reject(new Error("Failed to convert video."));
+        }
+        console.log("Video converted to MP4 successfully.");
+        resolve();
+      });
+    });
+
+    // Delete original uploaded file
+    try {
+      await fs.unlink(inputPath);
+      console.log("Original uploaded file deleted:", inputPath);
+    } catch (err) {
+      console.warn("Failed to delete original uploaded file:", err.message);
+    }
+
+    // Prepare to run Python script
+    const pythonScriptPath = path.join(
+      process.cwd(),
+      "utilities",
+      "audioOrVideoToText.py"
+    );
+    const pythonExecutable =
+      process.platform === "win32" ? "python" : "python3";
+
+    const pythonProcess = spawn(pythonExecutable, [
+      pythonScriptPath,
+      outputPath,
+    ]);
+
+    let transcription = "";
+    let errorOutput = "";
+
+    pythonProcess.stdout.on("data", (data) => {
+      transcription += data.toString();
+    });
+
+    pythonProcess.stderr.on("data", (data) => {
+      errorOutput += data.toString();
+    });
+
+    pythonProcess.on("close", async (code) => {
+      try {
+        await fs.unlink(outputPath);
+        console.log("Converted MP4 file deleted:", outputPath);
+      } catch (err) {
+        console.warn("Failed to delete converted MP4 file:", err.message);
+      }
+
+      if (code !== 0) {
+        console.error("Python transcription script error:", errorOutput);
+        return res
+          .status(500)
+          .json({ error: "Transcription failed.", details: errorOutput });
+      }
+
+      try {
+        const transcribedText = transcription.trim();
+        console.log("Transcribed Text:", transcribedText);
+
+        if (!transcribedText) {
+          return res.status(400).json({ error: "Empty transcription result." });
+        }
+
+        const therapyReply = await generateTherapyReply(transcribedText);
+        console.log("Therapy Reply Generated.");
+
+        const sentences = therapyReply
+          .split(/(?<=[.!?])\s+/)
+          .map((sentence) => sentence.trim())
+          .filter((sentence) => sentence.length > 0);
+
+        // Create lip sync/audio generation promises
+        const messagePromises = sentences.map((sentence, index) =>
+          generateAudioAndLipSync(sentence, index)
+        );
+
+        const messages = await Promise.all(messagePromises);
+
+        return res.json({ messages });
+      } catch (err) {
+        console.error("Error processing transcription:", err);
+        return res
+          .status(500)
+          .json({ error: "Failed to process transcription output." });
+      }
+    });
+
+    pythonProcess.on("error", (err) => {
+      console.error("Failed to start Python process:", err.message);
+      return res
+        .status(500)
+        .json({
+          error: "Failed to start transcription process.",
+          details: err.message,
+        });
+    });
+  } catch (error) {
+    console.error("Unexpected server error:", error);
+    return res
+      .status(500)
+      .json({ error: "Internal server error.", details: error.message });
+  }
 };
