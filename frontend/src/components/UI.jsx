@@ -1,5 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import { useChat } from "../hooks/useChat";
+import { GameModal } from "./GameModal";
+import { MusicModal } from "./MusicModal";
 
 export const UI = ({ hidden, ...props }) => {
   const input = useRef();
@@ -24,6 +26,9 @@ export const UI = ({ hidden, ...props }) => {
   const mediaRecorderRef = useRef(null);
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [videoStream, setVideoStream] = useState(null);
+
+  const [isGameOpen, setIsGameOpen] = useState(false); // <<== new state
+  const [isMusicOpen, setIsMusicOpen] = useState(false); // <<== new state
 
   // Format seconds into MM:SS display
   const formatTime = (seconds) => {
@@ -273,6 +278,34 @@ export const UI = ({ hidden, ...props }) => {
               />
             </svg>
           </button>
+
+          <button
+            onClick={() => setIsGameOpen(true)}
+            className="pointer-events-auto bg-pink-500 hover:bg-pink-600 text-white p-4 rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 640 512"
+              className="w-6 h-6"
+              fill="currentColor"
+            >
+              <path d="M192 64C86 64 0 150 0 256S86 448 192 448l256 0c106 0 192-86 192-192s-86-192-192-192L192 64zM496 168a40 40 0 1 1 0 80 40 40 0 1 1 0-80zM392 304a40 40 0 1 1 80 0 40 40 0 1 1 -80 0zM168 200c0-13.3 10.7-24 24-24s24 10.7 24 24l0 32 32 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-32 0 0 32c0 13.3-10.7 24-24 24s-24-10.7-24-24l0-32-32 0c-13.3 0-24-10.7-24-24s10.7-24 24-24l32 0 0-32z" />
+            </svg>
+          </button>
+
+          <button
+            onClick={() => setIsMusicOpen(true)}
+            className="pointer-events-auto bg-pink-500 hover:bg-pink-600 text-white p-4 rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 512 512"
+              className="w-6 h-6"
+              fill="currentColor"
+            >
+              <path d="M499.1 6.3c8.1 6 12.9 15.6 12.9 25.7l0 72 0 264c0 44.2-43 80-96 80s-96-35.8-96-80s43-80 96-80c11.2 0 22 1.6 32 4.6L448 147 192 223.8 192 432c0 44.2-43 80-96 80s-96-35.8-96-80s43-80 96-80c11.2 0 22 1.6 32 4.6L128 200l0-72c0-14.1 9.3-26.6 22.8-30.7l320-96c9.7-2.9 20.2-1.1 28.3 5z" />
+            </svg>
+          </button>
         </div>
 
         {/* Bottom Input and Controls */}
@@ -410,7 +443,6 @@ export const UI = ({ hidden, ...props }) => {
         </div>
       </div>
 
-      {/* Video Recording Modal */}
       {showVideoModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 pointer-events-auto">
           <div className="bg-white rounded-lg p-4 max-w-md w-full">
@@ -509,6 +541,10 @@ export const UI = ({ hidden, ...props }) => {
           </div>
         </div>
       )}
+
+      {isGameOpen && <GameModal onClose={() => setIsGameOpen(false)} />}
+
+      {isMusicOpen && <MusicModal onClose={() => setIsMusicOpen(false)} />}
     </>
   );
 };
