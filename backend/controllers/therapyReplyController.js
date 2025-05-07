@@ -331,6 +331,14 @@ export const videoReply = async(req, res) => {
     try {
         const file = req.file;
         const duration = req.body.duration;
+        const token = req.cookies.token;
+
+        if (!token) return res.status(401).json({ error: "Unauthorized" });
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const sessionId = req.cookies.activeSessionId;
+
+        if (!sessionId) return res.status(400).json({ error: "No active session selected" });
 
         // Validate file
         if (!file || file.size < 500) {
@@ -431,6 +439,26 @@ export const videoReply = async(req, res) => {
                 );
 
                 const messages = await Promise.all(messagePromises);
+
+                const emotion = "happy"; //await predictEmotion(uploaded_data_type, file_paths); change when the prediction is ready
+                const uploaded_data_type = "video";
+                const file_paths = outputPath //" the path should be changed when saved and added to the project github";
+                console.log(outputPath);
+                if (!uploaded_data_type || !file_paths) {
+                    return res.status(400).json({ error: "uploaded_data_type and file_paths are required." });
+                }
+
+                const newEmotion = await ExtractedEmotion.create({
+                    session_id: sessionId,
+                    extracted_emotion: emotion,
+                    uploaded_data_type,
+                    file_paths,
+                });
+
+                // Update TherapySession to include this emotion
+                await TherapySession.findByIdAndUpdate(sessionId, {
+                    $push: { emotion_records: newEmotion._id },
+                });
 
                 return res.json({ messages });
             } catch (err) {
