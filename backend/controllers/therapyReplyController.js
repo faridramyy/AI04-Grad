@@ -52,7 +52,43 @@ const generateTherapyReply = async (userMessage) => {
     You listen carefully, show empathy, and help users explore their feelings.
     Avoid giving direct advice. Instead, ask gentle, open-ended questions that encourage reflection.
     Always maintain a warm, patient, and non-judgmental tone.
-    `;
+  
+  Respond with:
+  - A JSON array.
+  - Each object must have: text, facialExpression, and animation.
+  - Each object represents exactly one empathetic sentence.
+  - The text should be open-ended questions, gentle reflections, or affirmations.
+  - Always maintain a compassionate, patient, and non-judgmental tone.
+  - Max 3 objects in the array.
+  
+  Facial expressions you can use:
+  - smile, sad, angry, surprised, funnyFace, default
+  
+  Animations you can use:
+  - Talking_0, Talking_1, Talking_2, Crying, Laughing, Rumba, Idle, Terrified, Angry
+  
+  Important rules:
+  - Never offer solutions or directives.
+  - Focus on encouraging self-reflection with caring, thoughtful questions.
+  - Make sure every message sounds genuinely kind and supportive.
+  - Begin the conversation by warmly welcoming the user and asking a gentle opening question.
+  - **Output only the raw JSON array — do NOT include any \`\`\`json code fences or any markdown formatting.**
+
+  
+  Example output:
+  [
+    {
+      "text": "sentence 1",
+      "facialExpression": "smile",
+      "animation": "Talking_0"
+    }
+    {
+      "text": "sentence 2",
+      "facialExpression": "smile",
+      "animation": "Talking_2"
+    }
+  ]
+  `;
 
   const result = await model.generateContent({
     contents: [
@@ -65,8 +101,12 @@ const generateTherapyReply = async (userMessage) => {
   return result.response.text();
 };
 
-const generateAudioAndLipSync = async (text, index) => {
+const generateAudioAndLipSync = async (obj, index) => {
   const fileName = `audios/message_${index}.mp3`;
+
+  const text = obj.text;
+
+  console.log(text);
 
   const audio = await elevenlabs.generate({
     voice: "Sarah",
@@ -81,8 +121,8 @@ const generateAudioAndLipSync = async (text, index) => {
     text,
     audio: await audioFileToBase64(fileName),
     lipsync: await readJsonTranscript(`audios/message_${index}.json`),
-    facialExpression: "neutral",
-    animation: "Idle",
+    facialExpression: obj.facialExpression,
+    animation: obj.animation,
   };
 };
 
@@ -116,7 +156,9 @@ const sendMissingKeysMessage = async (res) => {
 
 export const textReply = async (req, res) => {
   const userMessage = req.body.message;
+
   console.log(userMessage);
+
   if (!userMessage) {
     await sendDefaultIntro(res);
     return;
@@ -130,17 +172,14 @@ export const textReply = async (req, res) => {
   try {
     const answer = await generateTherapyReply(userMessage);
 
-    console.log(answer);
+    const responseArray = JSON.parse(answer);
 
-    const sentences = answer
-      .split(/(?<=[.!?])\s+/)
-      .map((sentence) => sentence.trim())
-      .filter((sentence) => sentence.length > 0);
+    console.log(responseArray);
 
     const messages = [];
 
-    for (let i = 0; i < sentences.length; i++) {
-      const message = await generateAudioAndLipSync(sentences[i], i);
+    for (let i = 0; i < responseArray.length; i++) {
+      const message = await generateAudioAndLipSync(responseArray[i], i);
       messages.push(message);
     }
 
@@ -234,17 +273,15 @@ export const audioReply = async (req, res) => {
         console.log("Transcribed Text:", transcribedText);
 
         const answer = await generateTherapyReply(transcribedText);
-        console.log("Therapy Answer:", answer);
 
-        const sentences = answer
-          .split(/(?<=[.!?])\s+/)
-          .map((sentence) => sentence.trim())
-          .filter((sentence) => sentence.length > 0);
+        const responseArray = JSON.parse(answer);
+
+        console.log(responseArray);
 
         const messages = [];
 
-        for (let i = 0; i < sentences.length; i++) {
-          const message = await generateAudioAndLipSync(sentences[i], i);
+        for (let i = 0; i < responseArray.length; i++) {
+          const message = await generateAudioAndLipSync(responseArray[i], i);
           messages.push(message);
         }
 
@@ -291,6 +328,7 @@ export const videoReply = async (req, res) => {
     console.log(
       `Uploaded file: ${file.originalname}, size: ${file.size} bytes`
     );
+    console.log(`Video duration: ${duration} seconds`);
     const inputPath = file.path;
     const outputPath = inputPath.replace(path.extname(inputPath), ".mp4");
 
@@ -359,26 +397,20 @@ export const videoReply = async (req, res) => {
         const transcribedText = transcription.trim();
         console.log("Transcribed Text:", transcribedText);
 
-        if (!transcribedText) {
-          return res.status(400).json({ error: "Empty transcription result." });
+        const answer = await generateTherapyReply(transcribedText);
+
+        const responseArray = JSON.parse(answer);
+
+        console.log(responseArray);
+
+        const messages = [];
+
+        for (let i = 0; i < responseArray.length; i++) {
+          const message = await generateAudioAndLipSync(responseArray[i], i);
+          messages.push(message);
         }
 
-        const therapyReply = await generateTherapyReply(transcribedText);
-        console.log("Therapy Reply Generated.");
-
-        const sentences = therapyReply
-          .split(/(?<=[.!?])\s+/)
-          .map((sentence) => sentence.trim())
-          .filter((sentence) => sentence.length > 0);
-
-        // Create lip sync/audio generation promises
-        const messagePromises = sentences.map((sentence, index) =>
-          generateAudioAndLipSync(sentence, index)
-        );
-
-        const messages = await Promise.all(messagePromises);
-
-        return res.json({ messages });
+        res.send({ messages });
       } catch (err) {
         console.error("Error processing transcription:", err);
         return res
