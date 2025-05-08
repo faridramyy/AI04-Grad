@@ -183,6 +183,8 @@ export const textReply = async (req, res) => {
       messages.push(message);
     }
 
+    //save data to database
+
     res.send({ messages });
   } catch (error) {
     console.error("Error:", error);
@@ -224,7 +226,6 @@ export const audioReply = async (req, res) => {
       );
     });
 
-    // Delete the original uploaded file after conversion
     try {
       await fs.unlink(inputPath);
       console.log("Original uploaded file deleted:", inputPath);
@@ -254,12 +255,12 @@ export const audioReply = async (req, res) => {
     });
 
     python.on("close", async (code) => {
-      try {
-        await fs.unlink(outputPath);
-        console.log("WAV file deleted:", outputPath);
-      } catch (unlinkError) {
-        console.warn("Failed to delete WAV file:", unlinkError.message);
-      }
+      // try {
+      //   await fs.unlink(outputPath);
+      //   console.log("WAV file deleted:", outputPath);
+      // } catch (unlinkError) {
+      //   console.warn("Failed to delete WAV file:", unlinkError.message);
+      // }
 
       if (code !== 0) {
         console.error("Transcription failed:", errorOutput);
@@ -284,6 +285,8 @@ export const audioReply = async (req, res) => {
           const message = await generateAudioAndLipSync(responseArray[i], i);
           messages.push(message);
         }
+
+        //save data to database
 
         res.send({ messages });
       } catch (error) {
@@ -315,7 +318,6 @@ export const videoReply = async (req, res) => {
     const file = req.file;
     const duration = req.body.duration;
 
-    // Validate file
     if (!file || file.size < 500) {
       return res
         .status(400)
@@ -345,15 +347,13 @@ export const videoReply = async (req, res) => {
       });
     });
 
-    // Delete original uploaded file
     try {
       await fs.unlink(inputPath);
       console.log("Original uploaded file deleted:", inputPath);
-    } catch (err) {
-      console.warn("Failed to delete original uploaded file:", err.message);
+    } catch (unlinkError) {
+      console.warn("Failed to delete original file:", unlinkError.message);
     }
 
-    // Prepare to run Python script
     const pythonScriptPath = path.join(
       process.cwd(),
       "utilities",
@@ -379,12 +379,12 @@ export const videoReply = async (req, res) => {
     });
 
     pythonProcess.on("close", async (code) => {
-      try {
-        await fs.unlink(outputPath);
-        console.log("Converted MP4 file deleted:", outputPath);
-      } catch (err) {
-        console.warn("Failed to delete converted MP4 file:", err.message);
-      }
+      // try {
+      //   await fs.unlink(outputPath);
+      //   console.log("Converted MP4 file deleted:", outputPath);
+      // } catch (err) {
+      //   console.warn("Failed to delete converted MP4 file:", err.message);
+      // }
 
       if (code !== 0) {
         console.error("Python transcription script error:", errorOutput);
@@ -409,6 +409,8 @@ export const videoReply = async (req, res) => {
           const message = await generateAudioAndLipSync(responseArray[i], i);
           messages.push(message);
         }
+
+        //save data to database
 
         res.send({ messages });
       } catch (err) {
