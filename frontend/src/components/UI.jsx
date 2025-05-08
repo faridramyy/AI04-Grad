@@ -1,7 +1,18 @@
-import { useRef, useState, useEffect } from "react";
 import { useChat } from "../hooks/useChat";
 import { GameModal } from "./GameModal";
 import { MusicModal } from "./MusicModal";
+import { useRef, useState, useEffect } from "react";
+import {
+  Mic,
+  Video,
+  Send,
+  X,
+  ZoomIn,
+  ZoomOut,
+  Gamepad2,
+  Music,
+  Camera,
+} from "lucide-react";
 
 export const UI = ({ hidden, ...props }) => {
   const input = useRef();
@@ -27,8 +38,9 @@ export const UI = ({ hidden, ...props }) => {
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [videoStream, setVideoStream] = useState(null);
 
-  const [isGameOpen, setIsGameOpen] = useState(false); // <<== new state
-  const [isMusicOpen, setIsMusicOpen] = useState(false); // <<== new state
+  const [isGameOpen, setIsGameOpen] = useState(false);
+  const [isMusicOpen, setIsMusicOpen] = useState(false);
+  const [showGreenScreen, setShowGreenScreen] = useState(false);
 
   // Format seconds into MM:SS display
   const formatTime = (seconds) => {
@@ -203,126 +215,72 @@ export const UI = ({ hidden, ...props }) => {
     stopVideoRecording();
   };
 
-  if (hidden) return null;
-
   return (
-    <>
-      <div className="fixed top-0 left-0 right-0 bottom-0 z-10 flex justify-between p-4 flex-col pointer-events-none">
+    <div className="min-h-screen bg-[#0F172A] text-white">
+      {/* Background elements */}
+      <div className="fixed inset-0 z-0">
+        <div
+          className={`absolute top-0 left-0 w-full h-full ${
+            showGreenScreen ? "bg-[#00FF00]" : "bg-[#0F172A]"
+          }`}
+        ></div>
+        {!showGreenScreen && (
+          <>
+            <div className="absolute top-0 left-0 w-full h-full opacity-30 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxwYXR0ZXJuIGlkPSJncmlkIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiPjxwYXRoIGQ9Ik0gNDAgMCBMIDAgMCAwIDQwIiBmaWxsPSJub25lIiBzdHJva2U9IiMxRTI5M0IiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')]"></div>
+            <div className="absolute top-[-50%] left-[-10%] w-[70%] h-[100%] rounded-full bg-gradient-to-r from-violet-600/20 to-indigo-600/20 blur-[120px]"></div>
+            <div className="absolute bottom-[-50%] right-[-10%] w-[70%] h-[100%] rounded-full bg-gradient-to-l from-cyan-500/20 to-teal-500/20 blur-[120px]"></div>
+          </>
+        )}
+      </div>
+
+      {/* Main Chat Interface */}
+      <div className="fixed top-0 left-0 right-0 bottom-0 z-10 flex justify-between p-4 flex-col">
         {/* Top Section */}
-        <div className="self-start backdrop-blur-md bg-white bg-opacity-50 p-4 rounded-lg">
-          {/* <h1 className="font-black text-xl">My Virtual GF</h1>
-          <p>I will always love you ❤️</p> */}
-        </div>
+        <div className="self-start backdrop-blur-md bg-[#131A2B]/60 p-4 rounded-lg border border-gray-800"></div>
 
         {/* Middle Buttons */}
         <div className="w-full flex flex-col items-end justify-center gap-4">
           <button
             onClick={() => setCameraZoomed(!cameraZoomed)}
-            className="pointer-events-auto bg-pink-500 hover:bg-pink-600 text-white p-4 rounded-md"
+            className="bg-gradient-to-r from-violet-600 to-cyan-500 hover:opacity-90 transition-opacity text-white p-4 rounded-full shadow-lg"
           >
             {cameraZoomed ? (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-6 h-6"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607zM13.5 10.5h-6"
-                />
-              </svg>
+              <ZoomOut className="w-6 h-6" />
             ) : (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-6 h-6"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607zM10.5 7.5v6m3-3h-6"
-                />
-              </svg>
+              <ZoomIn className="w-6 h-6" />
             )}
           </button>
 
           <button
-            onClick={() => {
-              const body = document.querySelector("body");
-              if (body.classList.contains("greenScreen")) {
-                body.classList.remove("greenScreen");
-              } else {
-                body.classList.add("greenScreen");
-              }
-            }}
-            className="pointer-events-auto bg-pink-500 hover:bg-pink-600 text-white p-4 rounded-md"
+            onClick={() => setShowGreenScreen(!showGreenScreen)}
+            className="bg-gradient-to-r from-violet-600 to-cyan-500 hover:opacity-90 transition-opacity text-white p-4 rounded-full shadow-lg"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="w-6 h-6"
-            >
-              <path
-                strokeLinecap="round"
-                d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z"
-              />
-            </svg>
+            <Camera className="w-6 h-6" />
           </button>
 
           <button
             onClick={() => setIsGameOpen(true)}
-            className="pointer-events-auto bg-pink-500 hover:bg-pink-600 text-white p-4 rounded-md"
+            className="bg-gradient-to-r from-violet-600 to-cyan-500 hover:opacity-90 transition-opacity text-white p-4 rounded-full shadow-lg"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 640 512"
-              className="w-6 h-6"
-              fill="currentColor"
-            >
-              <path d="M192 64C86 64 0 150 0 256S86 448 192 448l256 0c106 0 192-86 192-192s-86-192-192-192L192 64zM496 168a40 40 0 1 1 0 80 40 40 0 1 1 0-80zM392 304a40 40 0 1 1 80 0 40 40 0 1 1 -80 0zM168 200c0-13.3 10.7-24 24-24s24 10.7 24 24l0 32 32 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-32 0 0 32c0 13.3-10.7 24-24 24s-24-10.7-24-24l0-32-32 0c-13.3 0-24-10.7-24-24s10.7-24 24-24l32 0 0-32z" />
-            </svg>
+            <Gamepad2 className="w-6 h-6" />
           </button>
 
           <button
             onClick={() => setIsMusicOpen(true)}
-            className="pointer-events-auto bg-pink-500 hover:bg-pink-600 text-white p-4 rounded-md"
+            className="bg-gradient-to-r from-violet-600 to-cyan-500 hover:opacity-90 transition-opacity text-white p-4 rounded-full shadow-lg"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 512 512"
-              className="w-6 h-6"
-              fill="currentColor"
-            >
-              <path d="M499.1 6.3c8.1 6 12.9 15.6 12.9 25.7l0 72 0 264c0 44.2-43 80-96 80s-96-35.8-96-80s43-80 96-80c11.2 0 22 1.6 32 4.6L448 147 192 223.8 192 432c0 44.2-43 80-96 80s-96-35.8-96-80s43-80 96-80c11.2 0 22 1.6 32 4.6L128 200l0-72c0-14.1 9.3-26.6 22.8-30.7l320-96c9.7-2.9 20.2-1.1 28.3 5z" />
-            </svg>
+            <Music className="w-6 h-6" />
           </button>
         </div>
 
         {/* Bottom Input and Controls */}
-        <div className="flex items-center gap-2 pointer-events-auto max-w-screen-sm w-full mx-auto">
+        <div className="flex items-center gap-2 max-w-screen-sm w-full mx-auto">
           <div className="flex items-center w-full relative">
             {isRecording ? (
-              <div className="w-full flex items-center justify-between bg-opacity-50 bg-white backdrop-blur-md rounded-md p-4">
+              <div className="w-full flex items-center justify-between bg-[#131A2B]/80 backdrop-blur-md rounded-md p-4 border border-gray-800">
                 <div className="flex items-center">
                   <div className="animate-pulse mr-2">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      className="w-5 h-5 text-red-500"
-                    >
-                      <circle cx="12" cy="12" r="8" />
-                    </svg>
+                    <div className="w-3 h-3 rounded-full bg-gradient-to-r from-violet-600 to-cyan-500"></div>
                   </div>
                   <span className="font-medium">Recording Audio</span>
                 </div>
@@ -332,7 +290,7 @@ export const UI = ({ hidden, ...props }) => {
               </div>
             ) : (
               <input
-                className="w-full placeholder:text-gray-800 placeholder:italic pr-24 p-4 rounded-md bg-opacity-50 bg-white backdrop-blur-md"
+                className="w-full placeholder:text-gray-500 pr-24 p-4 rounded-md bg-[#131A2B]/80 backdrop-blur-md border border-gray-800 focus:border-violet-500 focus:outline-none"
                 placeholder="Type a message..."
                 ref={input}
                 disabled={inputsDisabled}
@@ -349,43 +307,19 @@ export const UI = ({ hidden, ...props }) => {
               onClick={toggleRecording}
               disabled={inputsDisabled || isVideoRecording}
               className={`absolute right-14 ${
-                isRecording ? "bg-red-500" : "bg-pink-500 hover:bg-pink-600"
+                isRecording
+                  ? "bg-gradient-to-r from-red-600 to-red-500"
+                  : "bg-gradient-to-r from-violet-600 to-cyan-500 hover:opacity-90"
               } ${
                 inputsDisabled || isVideoRecording
                   ? "opacity-50 cursor-not-allowed"
                   : ""
-              } text-white p-2 rounded-full`}
+              } text-white p-2 rounded-full transition-all duration-300`}
             >
               {isRecording ? (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-5 h-5"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M5.25 7.5A2.25 2.25 0 017.5 5.25h9a2.25 2.25 0 012.25 2.25v9a2.25 2.25 0 01-2.25 2.25h-9a2.25 2.25 0 01-2.25-2.25v-9z"
-                  />
-                </svg>
+                <X className="w-5 h-5" />
               ) : (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-5 h-5"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z"
-                  />
-                </svg>
+                <Mic className="w-5 h-5" />
               )}
             </button>
 
@@ -397,79 +331,51 @@ export const UI = ({ hidden, ...props }) => {
                 inputsDisabled || isRecording
                   ? "opacity-50 cursor-not-allowed"
                   : ""
-              } bg-pink-500 hover:bg-pink-600 text-white p-2 rounded-full`}
+              } bg-gradient-to-r from-violet-600 to-cyan-500 hover:opacity-90 text-white p-2 rounded-full transition-opacity`}
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-5 h-5"
-              >
-                <path
-                  strokeLinecap="round"
-                  d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M12 18.75H4.5a2.25 2.25 0 01-2.25-2.25V9a2.25 2.25 0 012.25-2.25H12a2.25 2.25 0 012.25 2.25v9a2.25 2.25 0 01-2.25 2.25z"
-                />
-              </svg>
+              <Video className="w-5 h-5" />
             </button>
           </div>
 
           <button
             disabled={inputsDisabled || isRecording || isVideoRecording}
             onClick={sendMessage}
-            className={`bg-pink-500 hover:bg-pink-600 text-white p-4 px-10 font-semibold uppercase rounded-md flex items-center justify-center ${
+            className={`bg-gradient-to-r from-violet-600 to-cyan-500 hover:opacity-90 transition-opacity text-white p-4 px-10 font-semibold rounded-md flex items-center justify-center ${
               inputsDisabled || isRecording || isVideoRecording
-                ? "cursor-not-allowed opacity-30"
+                ? "cursor-not-allowed opacity-50"
                 : ""
             }`}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="w-5 h-5 mr-2"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"
-              />
-            </svg>
+            <Send className="w-5 h-5 mr-2" />
             Send
           </button>
         </div>
       </div>
 
+      {/* Video Modal */}
       {showVideoModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 pointer-events-auto">
-          <div className="bg-white rounded-lg p-4 max-w-md w-full">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Video Message</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={closeVideoModal}
+          ></div>
+          <div className="relative bg-[#131A2B]/90 backdrop-blur-xl border border-gray-800 text-white rounded-xl w-full max-w-md p-6">
+            <div className="text-right">
               <button
                 onClick={closeVideoModal}
-                className="p-1 rounded-full hover:bg-gray-200"
+                className="text-gray-400 hover:text-white"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-6 h-6"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+                <X className="h-5 w-5" />
               </button>
             </div>
+            <div className="mb-6">
+              <h2 className="text-xl text-white font-bold">Video Message</h2>
+              <p className="text-gray-400">
+                Record a video message for your therapy session
+              </p>
+            </div>
 
-            <div className="relative bg-black rounded-lg overflow-hidden aspect-video mb-4">
+            <div className="relative bg-black rounded-lg overflow-hidden aspect-video mb-6">
               <video
                 ref={videoPreviewRef}
                 autoPlay
@@ -479,16 +385,9 @@ export const UI = ({ hidden, ...props }) => {
               ></video>
 
               {isVideoRecording && (
-                <div className="absolute top-2 left-2 flex items-center bg-black bg-opacity-60 text-white px-2 py-1 rounded-lg">
+                <div className="absolute top-2 left-2 flex items-center bg-black/60 text-white px-2 py-1 rounded-lg">
                   <div className="animate-pulse mr-2">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      className="w-4 h-4 text-red-500"
-                    >
-                      <circle cx="12" cy="12" r="8" />
-                    </svg>
+                    <div className="w-3 h-3 rounded-full bg-gradient-to-r from-violet-600 to-cyan-500"></div>
                   </div>
                   <span className="font-medium text-sm">
                     {formatTime(recordingTime)}
@@ -501,39 +400,17 @@ export const UI = ({ hidden, ...props }) => {
               {!isVideoRecording ? (
                 <button
                   onClick={startVideoRecordingHandler}
-                  className="bg-pink-500 hover:bg-pink-600 text-white font-medium py-2 px-4 rounded-lg flex items-center"
+                  className="bg-gradient-to-r from-violet-600 to-cyan-500 hover:opacity-90 transition-opacity text-white font-medium py-2 px-4 rounded-lg flex items-center"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="w-5 h-5 mr-2"
-                  >
-                    <circle cx="12" cy="12" r="8" fill="currentColor" />
-                  </svg>
+                  <div className="w-5 h-5 mr-2 rounded-full bg-red-500"></div>
                   Start Recording
                 </button>
               ) : (
                 <button
                   onClick={stopVideoRecordingHandler}
-                  className="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg flex items-center"
+                  className="bg-gradient-to-r from-red-600 to-red-500 hover:opacity-90 transition-opacity text-white font-medium py-2 px-4 rounded-lg flex items-center"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="w-5 h-5 mr-2"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M5.25 7.5A2.25 2.25 0 017.5 5.25h9a2.25 2.25 0 012.25 2.25v9a2.25 2.25 0 01-2.25 2.25h-9a2.25 2.25 0 01-2.25-2.25v-9z"
-                    />
-                  </svg>
+                  <X className="w-5 h-5 mr-2" />
                   Stop Recording
                 </button>
               )}
@@ -542,9 +419,11 @@ export const UI = ({ hidden, ...props }) => {
         </div>
       )}
 
+      {/* Game Modal */}
       {isGameOpen && <GameModal onClose={() => setIsGameOpen(false)} />}
 
+      {/* Music Modal */}
       {isMusicOpen && <MusicModal onClose={() => setIsMusicOpen(false)} />}
-    </>
+    </div>
   );
 };

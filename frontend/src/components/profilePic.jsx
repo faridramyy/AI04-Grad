@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 export default function ProfilePic() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false); // <<== new state
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const menuRef = useRef(null);
   const buttonRef = useRef(null);
 
@@ -40,7 +40,7 @@ export default function ProfilePic() {
       <button
         ref={buttonRef}
         onClick={toggleMenu}
-        className="w-10 h-10 rounded-full bg-pink-500 flex items-center justify-center text-white shadow-md hover:bg-pink-600 focus:outline-none"
+        className="bg-gradient-to-r from-violet-600 to-cyan-500 hover:opacity-90 transition-opacity text-white p-4 rounded-full shadow-lg"
         aria-label="Profile menu"
       >
         <svg
@@ -56,11 +56,11 @@ export default function ProfilePic() {
       {isMenuOpen && (
         <div
           ref={menuRef}
-          className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border"
+          className="absolute right-0 mt-2 w-48 bg-gray-900/80 backdrop-blur-lg rounded-md shadow-lg py-1 z-50 border border-white/10"
         >
           <Link
             to="/dashboard"
-            className="flex items-center w-full text-left px-4 py-2 text-sm hover:bg-pink-50"
+            className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-100 hover:bg-gray-800/50"
           >
             <svg
               className="w-4 h-4 mr-2"
@@ -75,7 +75,7 @@ export default function ProfilePic() {
           </Link>
 
           <button
-            className="flex items-center w-full text-left px-4 py-2 text-sm hover:bg-pink-50"
+            className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-100 hover:bg-gray-800/50"
             onClick={openSettings}
           >
             <svg
@@ -90,14 +90,14 @@ export default function ProfilePic() {
             Settings
           </button>
 
-          <div className="border-t border-red-200 my-1"></div>
+          <div className="border-t border-gray-700 my-1"></div>
 
           <button
-            className="flex items-center w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-red-50"
+            className="flex items-center w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-800/50"
             onClick={() => console.log("Log out clicked")}
           >
             <svg
-              className="w-4 h-4 mr-2 text-red-500"
+              className="w-4 h-4 mr-2 text-red-400"
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
