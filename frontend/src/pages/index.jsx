@@ -1,19 +1,28 @@
-import { useState, useEffect } from "react"
-import { MessageSquare, Brain, Shield, ArrowRight, Menu, X } from "lucide-react"
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+
+import {
+  MessageSquare,
+  Brain,
+  Shield,
+  ArrowRight,
+  Menu,
+  X,
+} from "lucide-react";
 
 export default function Index() {
-  const [loginOpen, setLoginOpen] = useState(false)
-  const [signupOpen, setSignupOpen] = useState(false)
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [scrolled, setScrolled] = useState(false)
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [signupOpen, setSignupOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20)
-    }
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#0F172A] text-white overflow-hidden">
@@ -27,7 +36,9 @@ export default function Index() {
 
       {/* Navigation */}
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-[#0F172A]/80 backdrop-blur-lg shadow-lg" : ""}`}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          scrolled ? "bg-[#0F172A]/80 backdrop-blur-lg shadow-lg" : ""
+        }`}
       >
         <div className="container mx-auto py-5 px-4 flex justify-between items-center">
           <div className="flex items-center gap-2 z-10">
@@ -44,11 +55,18 @@ export default function Index() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-6">
-            <button className="text-gray-300 hover:text-white hover:bg-white/10 px-4 py-2 rounded-md">
+            <Link
+              className="text-gray-300 hover:text-white hover:bg-white/10 px-4 py-2 rounded-md"
+              to="/how-it-works"
+            >
               How It Works
-            </button>
-            <button className="text-gray-300 hover:text-white hover:bg-white/10 px-4 py-2 rounded-md">Pricing</button>
-            <button className="text-gray-300 hover:text-white hover:bg-white/10 px-4 py-2 rounded-md">About Us</button>
+            </Link>
+            <Link
+              className="text-gray-300 hover:text-white hover:bg-white/10 px-4 py-2 rounded-md"
+              to="/about-us"
+            >
+              About Us
+            </Link>
             <button
               onClick={() => setLoginOpen(true)}
               className="border border-gray-700 text-gray-300 hover:text-white hover:bg-white/10 hover:border-gray-600 px-4 py-2 rounded-md"
@@ -64,8 +82,15 @@ export default function Index() {
           </nav>
 
           {/* Mobile menu button */}
-          <button className="md:hidden z-20 p-2 text-white" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          <button
+            className="md:hidden z-20 p-2 text-white"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? (
+              <X className="h-6 w-6" />
+            ) : (
+              <Menu className="h-6 w-6" />
+            )}
           </button>
         </div>
 
@@ -85,8 +110,8 @@ export default function Index() {
               <button
                 className="text-xl border border-gray-700 text-gray-300 hover:text-white hover:bg-white/10 px-6 py-3 rounded-md"
                 onClick={() => {
-                  setMobileMenuOpen(false)
-                  setLoginOpen(true)
+                  setMobileMenuOpen(false);
+                  setLoginOpen(true);
                 }}
               >
                 Login
@@ -94,8 +119,8 @@ export default function Index() {
               <button
                 className="text-xl bg-gradient-to-r from-violet-600 to-cyan-500 hover:opacity-90 transition-opacity px-6 py-3 rounded-md"
                 onClick={() => {
-                  setMobileMenuOpen(false)
-                  setSignupOpen(true)
+                  setMobileMenuOpen(false);
+                  setSignupOpen(true);
                 }}
               >
                 Sign Up
@@ -122,8 +147,8 @@ export default function Index() {
                 </span>
               </h1>
               <p className="text-xl text-gray-400 max-w-xl">
-                Experience personalized therapy sessions with our advanced AI. Available 24/7, confidential, and
-                tailored to your unique needs.
+                Experience personalized therapy sessions with our advanced AI.
+                Available 24/7, confidential, and tailored to your unique needs.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <button
@@ -162,7 +187,8 @@ export default function Index() {
               Why Choose MindfulAI Therapy?
             </h2>
             <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-              Our cutting-edge AI platform offers unique advantages for your mental wellness journey
+              Our cutting-edge AI platform offers unique advantages for your
+              mental wellness journey
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
@@ -189,8 +215,12 @@ export default function Index() {
               <div key={index} className="relative group">
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-violet-600 to-cyan-500 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-300"></div>
                 <div className="relative h-full bg-[#131A2B]/40 backdrop-blur-sm p-8 rounded-xl border border-gray-800 group-hover:border-gray-700 transition duration-300">
-                  <div className="bg-white/5 p-3 rounded-full w-fit mb-6">{feature.icon}</div>
-                  <h3 className="text-xl font-semibold text-white mb-4">{feature.title}</h3>
+                  <div className="bg-white/5 p-3 rounded-full w-fit mb-6">
+                    {feature.icon}
+                  </div>
+                  <h3 className="text-xl font-semibold text-white mb-4">
+                    {feature.title}
+                  </h3>
                   <p className="text-gray-400">{feature.description}</p>
                 </div>
               </div>
@@ -207,7 +237,8 @@ export default function Index() {
               What Our Users Say
             </h2>
             <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-              Real stories from people who transformed their mental wellbeing with MindfulAI
+              Real stories from people who transformed their mental wellbeing
+              with MindfulAI
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
@@ -233,14 +264,23 @@ export default function Index() {
                 <div className="relative h-full bg-[#131A2B]/40 backdrop-blur-sm p-8 rounded-xl border border-gray-800 group-hover:border-gray-700 transition duration-300">
                   <div className="flex items-center gap-2 mb-6">
                     {[...Array(5)].map((_, i) => (
-                      <svg key={i} className="w-5 h-5 text-violet-400" fill="currentColor" viewBox="0 0 20 20">
+                      <svg
+                        key={i}
+                        className="w-5 h-5 text-violet-400"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                       </svg>
                     ))}
                   </div>
-                  <p className="text-gray-300 mb-6 italic">"{testimonial.text}"</p>
+                  <p className="text-gray-300 mb-6 italic">
+                    "{testimonial.text}"
+                  </p>
                   <div>
-                    <p className="font-semibold text-white">{testimonial.name}</p>
+                    <p className="font-semibold text-white">
+                      {testimonial.name}
+                    </p>
                     <p className="text-sm text-gray-400">{testimonial.role}</p>
                   </div>
                 </div>
@@ -263,7 +303,8 @@ export default function Index() {
               Today
             </h2>
             <p className="text-xl text-gray-300 mb-10">
-              Join thousands who have transformed their mental wellbeing with MindfulAI's personalized therapy approach.
+              Join thousands who have transformed their mental wellbeing with
+              MindfulAI's personalized therapy approach.
             </p>
             <button
               className="h-14 px-10 bg-gradient-to-r from-violet-600 to-cyan-500 hover:opacity-90 transition-opacity text-lg rounded-md"
@@ -271,7 +312,9 @@ export default function Index() {
             >
               Start Free Trial
             </button>
-            <p className="mt-6 text-gray-400">No credit card required. 7-day free trial.</p>
+            <p className="mt-6 text-gray-400">
+              No credit card required. 7-day free trial.
+            </p>
           </div>
         </div>
       </section>
@@ -292,40 +335,56 @@ export default function Index() {
                   MindfulAI
                 </h3>
               </div>
-              <p className="text-gray-400 mb-6">AI-powered therapy for a healthier mind and happier life.</p>
+              <p className="text-gray-400 mb-6">
+                AI-powered therapy for a healthier mind and happier life.
+              </p>
               <div className="flex gap-4">
-                {["twitter", "facebook", "instagram", "linkedin"].map((social) => (
-                  <a
-                    key={social}
-                    href="#"
-                    className="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-colors"
-                  >
-                    <span className="sr-only">{social}</span>
-                    <div className="w-5 h-5 bg-gray-400"></div>
-                  </a>
-                ))}
+                {["twitter", "facebook", "instagram", "linkedin"].map(
+                  (social) => (
+                    <a
+                      key={social}
+                      href="#"
+                      className="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-colors"
+                    >
+                      <span className="sr-only">{social}</span>
+                      <div className="w-5 h-5 bg-gray-400"></div>
+                    </a>
+                  )
+                )}
               </div>
             </div>
             <div>
               <h4 className="font-semibold text-white mb-6">Company</h4>
               <ul className="space-y-4">
                 <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  <a
+                    href="#"
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
                     About Us
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  <a
+                    href="#"
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
                     Our Team
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  <a
+                    href="#"
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
                     Careers
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  <a
+                    href="#"
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
                     Contact
                   </a>
                 </li>
@@ -335,22 +394,34 @@ export default function Index() {
               <h4 className="font-semibold text-white mb-6">Resources</h4>
               <ul className="space-y-4">
                 <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  <a
+                    href="#"
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
                     Blog
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  <a
+                    href="#"
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
                     Research
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  <a
+                    href="#"
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
                     Mental Health Tips
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  <a
+                    href="#"
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
                     FAQ
                   </a>
                 </li>
@@ -360,22 +431,34 @@ export default function Index() {
               <h4 className="font-semibold text-white mb-6">Legal</h4>
               <ul className="space-y-4">
                 <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  <a
+                    href="#"
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
                     Privacy Policy
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  <a
+                    href="#"
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
                     Terms of Service
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  <a
+                    href="#"
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
                     Cookie Policy
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  <a
+                    href="#"
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
                     HIPAA Compliance
                   </a>
                 </li>
@@ -383,7 +466,10 @@ export default function Index() {
             </div>
           </div>
           <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-500">
-            <p>© {new Date().getFullYear()} MindfulAI Therapy. All rights reserved.</p>
+            <p>
+              © {new Date().getFullYear()} MindfulAI Therapy. All rights
+              reserved.
+            </p>
           </div>
         </div>
       </footer>
@@ -391,16 +477,24 @@ export default function Index() {
       {/* Login Modal */}
       {loginOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setLoginOpen(false)}></div>
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setLoginOpen(false)}
+          ></div>
           <div className="relative bg-[#131A2B]/80 backdrop-blur-xl border border-gray-800 text-white rounded-xl w-full max-w-md p-6">
             <div className="text-right">
-              <button onClick={() => setLoginOpen(false)} className="text-gray-400 hover:text-white">
+              <button
+                onClick={() => setLoginOpen(false)}
+                className="text-gray-400 hover:text-white"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
             <div className="mb-6">
               <h2 className="text-xl text-white font-bold">Welcome Back</h2>
-              <p className="text-gray-400">Continue your journey to mental wellness</p>
+              <p className="text-gray-400">
+                Continue your journey to mental wellness
+              </p>
             </div>
             <div className="space-y-5">
               <div className="relative">
@@ -425,8 +519,8 @@ export default function Index() {
                 <button
                   className="text-violet-400 hover:text-violet-300 transition-colors"
                   onClick={() => {
-                    setLoginOpen(false)
-                    setSignupOpen(true)
+                    setLoginOpen(false);
+                    setSignupOpen(true);
                   }}
                 >
                   Sign up
@@ -440,16 +534,26 @@ export default function Index() {
       {/* Signup Modal */}
       {signupOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setSignupOpen(false)}></div>
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setSignupOpen(false)}
+          ></div>
           <div className="relative bg-[#131A2B]/80 backdrop-blur-xl border border-gray-800 text-white rounded-xl w-full max-w-md p-6">
             <div className="text-right">
-              <button onClick={() => setSignupOpen(false)} className="text-gray-400 hover:text-white">
+              <button
+                onClick={() => setSignupOpen(false)}
+                className="text-gray-400 hover:text-white"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
             <div className="mb-6">
-              <h2 className="text-xl text-white font-bold">Start Your Journey</h2>
-              <p className="text-gray-400">Create your account to begin healing</p>
+              <h2 className="text-xl text-white font-bold">
+                Start Your Journey
+              </h2>
+              <p className="text-gray-400">
+                Create your account to begin healing
+              </p>
             </div>
             <div className="space-y-5">
               <div className="relative">
@@ -480,8 +584,8 @@ export default function Index() {
                 <button
                   className="text-violet-400 hover:text-violet-300 transition-colors"
                   onClick={() => {
-                    setSignupOpen(false)
-                    setLoginOpen(true)
+                    setSignupOpen(false);
+                    setLoginOpen(true);
                   }}
                 >
                   Login
@@ -492,5 +596,5 @@ export default function Index() {
         </div>
       )}
     </div>
-  )
+  );
 }
