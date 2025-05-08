@@ -1,49 +1,14 @@
 import { useState } from "react";
 
-// Sample history data - replace with your actual data
+// Sample history data
 const historyData = [
-  {
-    id: 1,
-    date: "2025-05-01",
-    title: "First Therapy Session",
-    summary: "Initial assessment and goal setting",
-  },
-  {
-    id: 2,
-    date: "2025-05-02",
-    title: "Anxiety Management",
-    summary: "Discussed techniques for managing anxiety",
-  },
-  {
-    id: 3,
-    date: "2025-05-03",
-    title: "Mindfulness Practice",
-    summary: "Guided meditation and mindfulness exercises",
-  },
-  {
-    id: 4,
-    date: "2025-05-04",
-    title: "Stress Reduction",
-    summary: "Strategies for reducing workplace stress",
-  },
-  {
-    id: 5,
-    date: "2025-05-05",
-    title: "Sleep Improvement",
-    summary: "Techniques for better sleep quality",
-  },
-  {
-    id: 6,
-    date: "2025-05-06",
-    title: "Relationship Counseling",
-    summary: "Communication strategies for relationships",
-  },
-  {
-    id: 7,
-    date: "2025-05-07",
-    title: "Self-Care Planning",
-    summary: "Developing a personalized self-care routine",
-  },
+  { id: 1, date: "2025-05-01", title: "First Therapy Session", summary: "Initial assessment and goal setting" },
+  { id: 2, date: "2025-05-02", title: "Anxiety Management", summary: "Discussed techniques for managing anxiety" },
+  { id: 3, date: "2025-05-03", title: "Mindfulness Practice", summary: "Guided meditation and mindfulness exercises" },
+  { id: 4, date: "2025-05-04", title: "Stress Reduction", summary: "Strategies for reducing workplace stress" },
+  { id: 5, date: "2025-05-05", title: "Sleep Improvement", summary: "Techniques for better sleep quality" },
+  { id: 6, date: "2025-05-06", title: "Relationship Counseling", summary: "Communication strategies for relationships" },
+  { id: 7, date: "2025-05-07", title: "Self-Care Planning", summary: "Developing a personalized self-care routine" },
 ];
 
 export default function FloatingHistoryPanel() {
@@ -84,7 +49,7 @@ export default function FloatingHistoryPanel() {
           </button>
         </div>
 
-        <div className="flex-grow overflow-y-auto p-2">
+        <div className="flex-grow overflow-y-auto p-2 no-scrollbar">
           {historyData.map((item) => (
             <div
               key={item.id}
