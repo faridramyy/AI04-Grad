@@ -13,7 +13,7 @@ CORS(app, origins=["http://localhost:3000"])
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Define your emotion classes manually (must match training order)
-EMOTION_CLASSES = ['angry', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
+EMOTION_CLASSES   = ['angry', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
 
 
 def get_model_architecture(name, num_classes):
