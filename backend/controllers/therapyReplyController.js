@@ -185,6 +185,8 @@ export const textReply = async (req, res) => {
 
     //save data to database
 
+    
+
     res.send({ messages });
   } catch (error) {
     console.error("Error:", error);
