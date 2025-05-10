@@ -1,13 +1,32 @@
-// components/Navigation.jsx
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Brain, Menu, X } from "lucide-react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+const BACKEND_URL = "http://localhost:3000";
 
 export default function Navigation() {
+  const navigate = useNavigate();
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const [signupOpen, setSignupOpen] = useState(false);
+
+  // Login state
+  const [loginUsername, setLoginUsername] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+
+  // Signup state
+  const [signupFirstName, setSignupFirstName] = useState("");
+  const [signupLastName, setSignupLastName] = useState("");
+  const [signupUsername, setSignupUsername] = useState("");
+  const [signupEmail, setSignupEmail] = useState("");
+  const [signupPhone, setSignupPhone] = useState("");
+  const [signupPassword, setSignupPassword] = useState("");
+  const [isSigningUp, setIsSigningUp] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -15,19 +34,76 @@ export default function Navigation() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const handleLogin = async () => {
+    if (isLoggingIn) return;
+    setIsLoggingIn(true);
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/users/signin`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: loginUsername,
+          password: loginPassword,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Login failed");
+
+      toast.success("Login successful!");
+      setTimeout(() => {
+        navigate("/avatar");
+        setLoginOpen(false);
+      }, 1000);
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  const handleSignup = async () => {
+    if (isSigningUp) return;
+    setIsSigningUp(true);
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/users/signup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firstname: signupFirstName,
+          lastname: signupLastName,
+          username: signupUsername,
+          email: signupEmail,
+          phonenumber: signupPhone,
+          password: signupPassword,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Signup failed");
+
+      toast.success("Account created successfully!");
+      setSignupOpen(false);
+      setLoginOpen(true);
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setIsSigningUp(false);
+    }
+  };
+
   return (
     <>
-      {/* Navigation Bar */}
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
+
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           scrolled ? "bg-[#0F172A]/80 backdrop-blur-lg shadow-lg" : ""
         }`}
       >
         <div className="container mx-auto py-5 px-4 flex justify-between items-center">
-          {/* Logo */}
           <Link className="flex items-center gap-2 z-10" to="/">
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-violet-600 to-cyan-500 rounded-full blur-sm"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-violet-600 to-cyan-500 rounded-full blur-sm" />
               <div className="relative bg-[#0F172A] p-2 rounded-full">
                 <Brain className="h-6 w-6 text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-cyan-500" />
               </div>
@@ -37,7 +113,6 @@ export default function Navigation() {
             </h1>
           </Link>
 
-          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-6">
             <Link
               className="text-gray-300 hover:text-white hover:bg-white/10 px-4 py-2 rounded-md"
@@ -65,7 +140,6 @@ export default function Navigation() {
             </button>
           </nav>
 
-          {/* Mobile Menu Button */}
           <button
             className="md:hidden z-20 p-2 text-white"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -78,7 +152,6 @@ export default function Navigation() {
           </button>
         </div>
 
-        {/* Mobile Navigation */}
         {mobileMenuOpen && (
           <div className="fixed inset-0 z-10 bg-[#0F172A]/95 backdrop-blur-lg md:hidden">
             <div className="flex flex-col items-center justify-center h-full gap-8">
@@ -143,26 +216,34 @@ export default function Navigation() {
             </div>
             <div className="space-y-5">
               <input
-                type="email"
-                placeholder="Email"
+                type="text"
+                placeholder="Username"
+                value={loginUsername}
+                onChange={(e) => setLoginUsername(e.target.value)}
                 className="w-full bg-[#1E293B] border border-gray-700 text-white placeholder:text-gray-500 focus:border-violet-500 h-12 px-4 rounded-md"
               />
               <input
                 type="password"
                 placeholder="Password"
+                value={loginPassword}
+                onChange={(e) => setLoginPassword(e.target.value)}
                 className="w-full bg-[#1E293B] border border-gray-700 text-white placeholder:text-gray-500 focus:border-violet-500 h-12 px-4 rounded-md"
               />
-              <button className="w-full h-12 bg-gradient-to-r from-violet-600 to-cyan-500 hover:opacity-90 transition-opacity rounded-md">
-                Login
+              <button
+                onClick={handleLogin}
+                disabled={isLoggingIn}
+                className="w-full h-12 bg-gradient-to-r from-violet-600 to-cyan-500 hover:opacity-90 transition-opacity rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoggingIn ? "Logging in..." : "Login"}
               </button>
               <p className="text-center text-sm text-gray-400">
                 Don&apos;t have an account?{" "}
                 <button
-                  className="text-violet-400 hover:text-violet-300 transition-colors"
                   onClick={() => {
                     setLoginOpen(false);
                     setSignupOpen(true);
                   }}
+                  className="text-violet-400 hover:text-violet-300 transition-colors"
                 >
                   Sign up
                 </button>
@@ -197,31 +278,62 @@ export default function Navigation() {
               </p>
             </div>
             <div className="space-y-5">
+              <div className="flex gap-4">
+                <input
+                  placeholder="First Name"
+                  value={signupFirstName}
+                  onChange={(e) => setSignupFirstName(e.target.value)}
+                  className="w-1/2 bg-[#1E293B] border border-gray-700 text-white placeholder:text-gray-500 focus:border-violet-500 h-12 px-4 rounded-md"
+                />
+                <input
+                  placeholder="Last Name"
+                  value={signupLastName}
+                  onChange={(e) => setSignupLastName(e.target.value)}
+                  className="w-1/2 bg-[#1E293B] border border-gray-700 text-white placeholder:text-gray-500 focus:border-violet-500 h-12 px-4 rounded-md"
+                />
+              </div>
               <input
-                placeholder="Full Name"
+                placeholder="Username"
+                value={signupUsername}
+                onChange={(e) => setSignupUsername(e.target.value)}
                 className="w-full bg-[#1E293B] border border-gray-700 text-white placeholder:text-gray-500 focus:border-violet-500 h-12 px-4 rounded-md"
               />
               <input
                 type="email"
                 placeholder="Email"
+                value={signupEmail}
+                onChange={(e) => setSignupEmail(e.target.value)}
+                className="w-full bg-[#1E293B] border border-gray-700 text-white placeholder:text-gray-500 focus:border-violet-500 h-12 px-4 rounded-md"
+              />
+              <input
+                type="tel"
+                placeholder="Phone Number"
+                value={signupPhone}
+                onChange={(e) => setSignupPhone(e.target.value)}
                 className="w-full bg-[#1E293B] border border-gray-700 text-white placeholder:text-gray-500 focus:border-violet-500 h-12 px-4 rounded-md"
               />
               <input
                 type="password"
                 placeholder="Password"
+                value={signupPassword}
+                onChange={(e) => setSignupPassword(e.target.value)}
                 className="w-full bg-[#1E293B] border border-gray-700 text-white placeholder:text-gray-500 focus:border-violet-500 h-12 px-4 rounded-md"
               />
-              <button className="w-full h-12 bg-gradient-to-r from-violet-600 to-cyan-500 hover:opacity-90 transition-opacity rounded-md">
-                Create Account
+              <button
+                onClick={handleSignup}
+                disabled={isSigningUp}
+                className="w-full h-12 bg-gradient-to-r from-violet-600 to-cyan-500 hover:opacity-90 transition-opacity rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSigningUp ? "Creating..." : "Create Account"}
               </button>
               <p className="text-center text-sm text-gray-400">
                 Already have an account?{" "}
                 <button
-                  className="text-violet-400 hover:text-violet-300 transition-colors"
                   onClick={() => {
                     setSignupOpen(false);
                     setLoginOpen(true);
                   }}
+                  className="text-violet-400 hover:text-violet-300 transition-colors"
                 >
                   Login
                 </button>
