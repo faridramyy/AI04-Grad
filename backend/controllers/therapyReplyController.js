@@ -337,6 +337,24 @@ export const audioReply = async (req, res) => {
   }
 };
 
+const extractVideoFinalPrediction = (stdout) => {
+  const match = stdout.match(/Final Prediction:\s*(\w+)/);
+  return match ? match[1] : null;
+};
+
+const predictEmotionFromVideo = async (videoPath) => {
+  const pythonScriptPath = path.join(
+    process.cwd(),
+    "utilities",
+    "predict_video.py"
+  );
+  const command = `python3 "${pythonScriptPath}" "${videoPath}"`;
+  const output = await execCommand(command);
+  const prediction = extractVideoFinalPrediction(output);
+  console.log("🎯 Final Video Emotion Prediction:", prediction);
+  return prediction;
+};
+
 export const videoReply = async (req, res) => {
   try {
     const file = req.file;
@@ -420,6 +438,9 @@ export const videoReply = async (req, res) => {
       try {
         const transcribedText = transcription.trim();
         console.log("Transcribed Text:", transcribedText);
+
+        const emotion_extracted = await predictEmotionFromVideo(outputPath);
+        console.log("🎯 Final Emotion Extracted:", emotion_extracted);
 
         const answer = await generateTherapyReply(transcribedText);
 
