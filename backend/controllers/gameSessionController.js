@@ -2,6 +2,7 @@ import GameSession from "../models/game_session.js";
 import StressScenario from "../models/stress_scenario.js"
 import jwt from "jsonwebtoken";
 import TherapySession from "../models/therapy_session.js";
+
 // @desc    Get all game sessions
 // @route   GET /gamesessions
 export const getAllGameSessions = async(req, res) => {
@@ -25,18 +26,130 @@ export const getGameSessionById = async(req, res) => {
     }
 };
 
-// @desc    Create a game session
-// @route   POST /gamesessions
-// @body    { session_id, stress_score_after, questions, user_answers, is_correct, final_score, difficulty_level }
+
+
+
+
+
+
+
 export const createGameSession = async(req, res) => {
     try {
-        const newSession = new GameSession(req.body);
-        await newSession.save();
-        res.status(201).json(newSession);
+        // ─── 1. Auth & session lookup ────────────────────────────────────
+        const token = req.cookies.token;
+        if (!token) return res.status(401).json({ error: "Unauthorized: no token." });
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const userId = decoded.userId;
+
+        const sessionId = req.cookies.activeSessionId;
+        if (!sessionId) {
+            return res.status(400).json({ error: "No active session cookie set." });
+        }
+
+        const therapySession = await TherapySession.findById(sessionId);
+        if (!therapySession) {
+            return res.status(404).json({ error: "Therapy session not found." });
+        }
+        if (therapySession.patient_id.toString() !== userId) {
+            return res.status(403).json({ error: "Forbidden: not your session." });
+        }
+
+        // ─── 2. Validate payload ─────────────────────────────────────────
+        const { scenarios, user_answers, stress_score_before } = req.body;
+        if (!Array.isArray(scenarios) || scenarios.length === 0) {
+            return res
+                .status(400)
+                .json({ error: "scenarios must be a non-empty array." });
+        }
+        if (!Array.isArray(user_answers) ||
+            user_answers.length !== scenarios.length
+        ) {
+            return res
+                .status(400)
+                .json({ error: "user_answers must match scenarios.length." });
+        }
+        if (typeof stress_score_before !== "number") {
+            return res
+                .status(400)
+                .json({ error: "stress_score_before must be a number." });
+        }
+
+        // ─── 3. Persist each scenario ─────────────────────────────────────
+        const createdScenarios = await Promise.all(
+            scenarios.map((s) =>
+                StressScenario.create({
+                    question: s.question,
+                    choices: s.choices,
+                    answer_index: s.answer_index,
+                    difficulty: s.difficulty,
+                })
+            )
+        );
+        const questionIds = createdScenarios.map((doc) => doc._id);
+
+        // ─── 4. Determine correctness & adjust stress ────────────────────
+        let stress = stress_score_before;
+        const is_correct = createdScenarios.map((scenario, i) => {
+            const correct = user_answers[i] === scenario.answer_index;
+            // points by difficulty
+            const pts =
+                scenario.difficulty === "hard" ? 3 :
+                scenario.difficulty === "medium" ? 2 : 1;
+            stress += (correct ? -pts : pts) * 0.1;
+            return correct;
+        });
+        // clamp at zero
+        if (stress < 0) stress = 0;
+        stress = Math.round(stress * 10) / 10;
+
+
+        // ─── 5. Compute final game score (out of 10) ─────────────────────
+        const correctCount = is_correct.filter(Boolean).length;
+        const final_score = (correctCount / scenarios.length) * 10;
+
+        // ─── 6. Mode of difficulties ──────────────────────────────────────
+        const freq = createdScenarios.reduce((acc, s) => {
+            acc[s.difficulty] = (acc[s.difficulty] || 0) + 1;
+            return acc;
+        }, {});
+        const difficulty_level = Object.entries(freq).reduce((best, curr) =>
+            curr[1] > best[1] ? curr : best
+        )[0];
+
+        // ─── 7. Create & save GameSession ────────────────────────────────
+        const gameSession = await GameSession.create({
+            session_id: sessionId,
+            stress_score_before,
+            stress_score_after: stress,
+            questions: questionIds,
+            user_answers,
+            is_correct,
+            final_score,
+            difficulty_level,
+        });
+
+        // ─── 8. Update parent TherapySession ─────────────────────────────
+        therapySession.game_sessions.push(gameSession._id);
+        therapySession.stress_score_after = stress;
+        await therapySession.save();
+
+        // ─── 9. Respond ───────────────────────────────────────────────────
+        return res.status(201).json(gameSession);
     } catch (err) {
-        res.status(400).json({ error: err.message });
+        return res.status(500).json({ error: err.message });
     }
 };
+
+
+
+
+
+
+
+
+
+
+
 
 // @desc    Update a game session
 // @route   PUT /gamesessions/:id
