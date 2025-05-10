@@ -2,6 +2,12 @@ import os
 import sys
 import pickle
 import numpy as np
+
+# Suppress TensorFlow logs and progress output
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+import tensorflow as tf
+tf.get_logger().setLevel("ERROR")
+
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
@@ -38,7 +44,7 @@ def main():
         print("❌ Please provide a sentence as a command-line argument.")
         return
 
-    sentence = " ".join(sys.argv[1:])  # Supports multi-word input without quotes
+    sentence = " ".join(sys.argv[1:])  # Handle multi-word input
 
     try:
         models_dict = load_all_models("text")
@@ -65,7 +71,7 @@ def main():
             sequence = tokenizer.texts_to_sequences([sentence])
             padded_sequence = pad_sequences(sequence, maxlen=100)
 
-            prediction = model.predict(padded_sequence)
+            prediction = model.predict(padded_sequence, verbose=0)
             predicted_class = np.argmax(prediction, axis=1)
             predicted_label = label_encoder.inverse_transform(predicted_class)[0]
 

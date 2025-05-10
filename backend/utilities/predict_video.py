@@ -25,7 +25,7 @@ def get_model_architecture(name, num_classes):
     return model
 
 def load_all_models(data_type):
-    MODELS_DIR = f"../models/{data_type}/exported_files/"
+    MODELS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "models", data_type, "exported_files"))
     models_dict = {}
 
     for file in os.listdir(MODELS_DIR):
