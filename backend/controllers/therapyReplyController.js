@@ -154,6 +154,27 @@ const sendMissingKeysMessage = async (res) => {
   });
 };
 
+const extractFinalPrediction = (stdout) => {
+  const match = stdout.match(/🎯 Final Ensemble Prediction:\s*(\w+)/);
+  return match ? match[1] : null;
+};
+
+const predictEmotionFromText = async (text) => {
+  const pythonScriptPath = path.join(
+    process.cwd(),
+    "utilities",
+    "predict_text.py"
+  );
+  const command = `python3 "${pythonScriptPath}" "${text.replace(
+    /"/g,
+    '\\"'
+  )}"`;
+  const output = await execCommand(command);
+  const prediction = extractFinalPrediction(output);
+  console.log("🎯 Final Emotion Prediction:", prediction);
+  return prediction;
+};
+
 export const textReply = async (req, res) => {
   const userMessage = req.body.message;
 
@@ -170,6 +191,9 @@ export const textReply = async (req, res) => {
   }
 
   try {
+    const emotion_extracted = await predictEmotionFromText(userMessage);
+    console.log("🎯 Final Emotion Extracted:", emotion_extracted);
+
     const answer = await generateTherapyReply(userMessage);
 
     const responseArray = JSON.parse(answer);
@@ -184,8 +208,6 @@ export const textReply = async (req, res) => {
     }
 
     //save data to database
-
-    
 
     res.send({ messages });
   } catch (error) {
@@ -315,6 +337,24 @@ export const audioReply = async (req, res) => {
   }
 };
 
+const extractVideoFinalPrediction = (stdout) => {
+  const match = stdout.match(/Final Prediction:\s*(\w+)/);
+  return match ? match[1] : null;
+};
+
+const predictEmotionFromVideo = async (videoPath) => {
+  const pythonScriptPath = path.join(
+    process.cwd(),
+    "utilities",
+    "predict_video.py"
+  );
+  const command = `python3 "${pythonScriptPath}" "${videoPath}"`;
+  const output = await execCommand(command);
+  const prediction = extractVideoFinalPrediction(output);
+  console.log("🎯 Final Video Emotion Prediction:", prediction);
+  return prediction;
+};
+
 export const videoReply = async (req, res) => {
   try {
     const file = req.file;
@@ -398,6 +438,9 @@ export const videoReply = async (req, res) => {
       try {
         const transcribedText = transcription.trim();
         console.log("Transcribed Text:", transcribedText);
+
+        const emotion_extracted = await predictEmotionFromVideo(outputPath);
+        console.log("🎯 Final Emotion Extracted:", emotion_extracted);
 
         const answer = await generateTherapyReply(transcribedText);
 

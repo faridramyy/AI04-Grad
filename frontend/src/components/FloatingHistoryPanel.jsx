@@ -1,22 +1,47 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 
-// Sample history data
-const historyData = [
-  { id: 1, date: "2025-05-01", title: "First Therapy Session", summary: "Initial assessment and goal setting" },
-  { id: 2, date: "2025-05-02", title: "Anxiety Management", summary: "Discussed techniques for managing anxiety" },
-  { id: 3, date: "2025-05-03", title: "Mindfulness Practice", summary: "Guided meditation and mindfulness exercises" },
-  { id: 4, date: "2025-05-04", title: "Stress Reduction", summary: "Strategies for reducing workplace stress" },
-  { id: 5, date: "2025-05-05", title: "Sleep Improvement", summary: "Techniques for better sleep quality" },
-  { id: 6, date: "2025-05-06", title: "Relationship Counseling", summary: "Communication strategies for relationships" },
-  { id: 7, date: "2025-05-07", title: "Self-Care Planning", summary: "Developing a personalized self-care routine" },
-];
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 export default function FloatingHistoryPanel() {
   const [isOpen, setIsOpen] = useState(false);
+  const [historyData, setHistoryData] = useState([]);
 
   const togglePanel = () => {
     setIsOpen(!isOpen);
   };
+
+  useEffect(() => {
+    const fetchSessions = async () => {
+      try {
+        const res = await axios.get(
+          `${BACKEND_URL}/api/therapy-sessions/getMySessions`,
+          { withCredentials: true }
+        );
+        const sessions = res.data;
+
+        const parsedData = sessions.map((session, index) => {
+          const chatSessions = session.chat_sessions || [];
+          const lastChat = chatSessions.length
+            ? chatSessions[chatSessions.length - 1]
+            : null;
+
+          return {
+            id: session._id,
+            date: new Date(session.start_time).toISOString().split("T")[0],
+            title: `Session ${index + 1}`,
+            summary: lastChat ? lastChat.message_text : "No messages available",
+          };
+        });
+
+        setHistoryData(parsedData);
+      } catch (error) {
+        console.error("Failed to fetch therapy sessions:", error);
+      }
+    };
+
+    fetchSessions();
+  }, []);
 
   return (
     <div className="relative">
@@ -57,7 +82,9 @@ export default function FloatingHistoryPanel() {
             >
               <div className="text-sm text-gray-400">{item.date}</div>
               <div className="font-medium text-white">{item.title}</div>
-              <div className="text-sm mt-1 text-gray-300">{item.summary}</div>
+              <div className="text-sm mt-1 text-gray-300 line-clamp-2">
+                {item.summary}
+              </div>
             </div>
           ))}
         </div>
