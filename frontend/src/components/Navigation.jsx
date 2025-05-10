@@ -56,6 +56,7 @@ export default function Navigation() {
         setLoginOpen(false);
       }, 1000);
     } catch (err) {
+      console.error(err.message);
       toast.error(err.message);
     } finally {
       setIsLoggingIn(false);

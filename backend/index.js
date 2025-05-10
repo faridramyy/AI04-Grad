@@ -18,10 +18,16 @@ import therapyReplyRoutes from "./routes/therapyReplyRoutes.js";
 
 const port = secrets.PORT;
 const app = express();
-app.use(cors());
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(
+  cors({
+    origin: "http://localhost:5173", // Your React dev URL
+    credentials: true,               // ✅ Allow credentials (cookies)
+  })
+);
 
 app.use("/api/users", userRoutes);
 app.use("/api/therapy-sessions", therapySessionRoutes);
