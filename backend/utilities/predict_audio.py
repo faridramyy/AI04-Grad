@@ -4,10 +4,16 @@ import pickle
 import numpy as np
 import librosa
 import soundfile as sf
+
+# Suppress TensorFlow logs
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+import tensorflow as tf
+tf.get_logger().setLevel("ERROR")
+
 from tensorflow.keras.models import load_model
 
 def load_all_models(data_type):
-    MODELS_DIR = f"../models/{data_type}/exported_files/"
+    MODELS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "models", data_type, "exported_files"))
     models = {}
 
     for file in os.listdir(MODELS_DIR):
@@ -27,18 +33,18 @@ def load_all_models(data_type):
                 }
 
             except Exception as e:
-                print(f"Failed to load {model_name}: {e}")
+                print(f"❌ Failed to load {model_name}: {e}")
 
     return models
 
 def preprocess_audio(y, sr, model_name):
     if model_name == "cnn_CREMA_D":
-        mel = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=128)
-        log_mel = librosa.power_to_db(mel, ref=np.max)
-        log_mel = librosa.util.fix_length(log_mel, size=128, axis=1)
-        log_mel = (log_mel - np.min(log_mel)) / (np.max(log_mel) - np.min(log_mel))
-        return np.expand_dims(log_mel, axis=(0, -1))
-    
+        # Create a 768-length feature vector (match model expectation)
+        mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=24)  # (24, time)
+        mfcc = librosa.util.fix_length(mfcc, size=32, axis=1)  # Ensure (24, 32)
+        flattened = mfcc.flatten()  # → (768,)
+        return np.expand_dims(flattened, axis=0)  # → (1, 768)
+
     elif model_name == "cnn":
         mel = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=24)
         log_mel = librosa.power_to_db(mel, ref=np.max)
@@ -55,6 +61,7 @@ def preprocess_audio(y, sr, model_name):
         return np.expand_dims(mfcc.T, axis=0)
 
     return None
+
 
 def main():
     if len(sys.argv) < 2:
@@ -88,7 +95,7 @@ def main():
                 predictions[model_name] = "Preprocessing failed"
                 continue
 
-            prediction = model.predict(features)
+            prediction = model.predict(features, verbose=0)
             class_index = int(np.argmax(prediction, axis=1)[0])
             label = encoder.inverse_transform([class_index])[0]
 
@@ -101,8 +108,10 @@ def main():
             if weighted_votes else "Unable to determine"
         )
 
-        print(f"Predictions: {predictions}")
-        print(f"Final Prediction: {final_prediction}")
+        print("✅ Individual Model Predictions:")
+        for name, label in predictions.items():
+            print(f" - {name}: {label}")
+        print(f"\n🎯 Final Ensemble Prediction: {final_prediction}")
 
     except Exception as e:
         print(f"❌ Error: {str(e)}")
