@@ -4,55 +4,66 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
 
-export const signinUser = async (req, res) => {
-  try {
-    const { username, password } = req.body;
-    if (!username || !password) {
-      return res
-        .status(400)
-        .json({ error: "Username and password are required." });
+export const signinUser = async(req, res) => {
+    try {
+        const { username, password } = req.body;
+        if (!username || !password) {
+            return res.status(400).json({ error: "Username and password are required." });
+        }
+
+        // 1. Check if username exists
+        const user = await User.findOne({ username });
+        if (!user) {
+            return res.status(400).json({ error: "Username not found" });
+        }
+
+        // 2. Compare password
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ error: "Incorrect password" });
+        }
+
+        // 3. Generate JWT token
+        const token = jwt.sign({ userId: user._id, role: user.role },
+            process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || "1d" }
+        );
+
+        // 4. Find their most recent therapy session
+        const recentSession = await TherapySession
+            .findOne({ patient_id: user._id })
+            .sort({ createdAt: -1 }) // assumes you have timestamps enabled
+            .select("_id"); // we only need the ID
+
+        // 5. Set cookies: token + (if exists) activeSessionId
+        const cookieOpts = {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "Lax",
+            maxAge: 24 * 60 * 60 * 1000, // 1 day
+        };
+
+        res
+            .cookie("token", token, cookieOpts);
+
+        if (recentSession) {
+            res.cookie("activeSessionId", recentSession._id.toString(), cookieOpts);
+        }
+
+        // 6. Send response
+        return res.status(200).json({
+            message: "Signed in successfully",
+            token,
+            user: {
+                id: user._id,
+                role: user.role,
+                username: user.username,
+            },
+            activeSessionId: recentSession._id || null,
+        });
+
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
     }
-
-    // 1. Check if username exists
-    const user = await User.findOne({ username });
-    if (!user) {
-      return res.status(400).json({ error: "Username not found" });
-    }
-
-    // 2. Compare password
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ error: "Incorrect password" });
-    }
-
-    // 3. Generate JWT token
-    const token = jwt.sign(
-      { userId: user._id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || "1d" }
-    );
-
-    // ✅ Set token as a cookie
-    res
-      .cookie("token", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production", // true in production (HTTPS)
-        sameSite: "Lax", // "None" if using different domains and secure is true
-        maxAge: 24 * 60 * 60 * 1000, // 1 day in milliseconds
-      })
-      .status(200)
-      .json({
-        message: "Signed in successfully",
-        token,
-        user: {
-          id: user._id,
-          role: user.role,
-          username: user.username,
-        },
-      });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
 };
 
 // /**
