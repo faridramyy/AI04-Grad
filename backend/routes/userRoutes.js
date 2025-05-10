@@ -2,6 +2,7 @@ import express from "express";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
 import {
   createUser,
+  logoutUser,
   getAllUsers,
   getUserById,
   updateUser,
@@ -14,6 +15,8 @@ const router = express.Router();
 // 👇 All routes are prefixed with /api/users in index.js
 router.post("/signin", authMiddleware("none"), signinUser);
 router.post("/signup", authMiddleware("none"), createUser);
+router.post("/logout", logoutUser);
+
 
 //admin functions
 router.post("/create_user", authMiddleware("admin"), createUser); // Create new user

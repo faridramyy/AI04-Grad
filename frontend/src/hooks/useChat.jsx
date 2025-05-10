@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
-const backendUrl = "http://localhost:3000";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 const ChatContext = createContext();
 
 export const ChatProvider = ({ children }) => {
@@ -17,7 +17,7 @@ export const ChatProvider = ({ children }) => {
 
     setLoading(true);
     try {
-      const data = await fetch(`${backendUrl}/api/therapy-reply/text`, {
+      const data = await fetch(`${BACKEND_URL}/api/therapy-reply/text`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -43,7 +43,7 @@ export const ChatProvider = ({ children }) => {
       formData.append("audio", audioBlob, "recording.webm");
       formData.append("duration", audioDuration);
 
-      const response = await fetch(`${backendUrl}/api/therapy-reply/audio`, {
+      const response = await fetch(`${BACKEND_URL}/api/therapy-reply/audio`, {
         method: "POST",
         body: formData,
       });
@@ -76,7 +76,7 @@ export const ChatProvider = ({ children }) => {
       formData.append("video", videoBlob, "recording.webm");
       formData.append("duration", videoDuration);
 
-      const response = await fetch(`${backendUrl}/api/therapy-reply/video`, {
+      const response = await fetch(`${BACKEND_URL}/api/therapy-reply/video`, {
         method: "POST",
         body: formData,
       });
