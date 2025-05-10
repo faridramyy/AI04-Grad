@@ -58,7 +58,10 @@ export const signinUser = async(req, res) => {
                 role: user.role,
                 username: user.username,
             },
-            activeSessionId: recentSession._id || null,
+            activeSessionId: recentSession ?
+                recentSession._id :
+                null,
+
         });
 
     } catch (err) {
