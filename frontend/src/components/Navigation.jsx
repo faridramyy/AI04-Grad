@@ -45,6 +45,7 @@ export default function Navigation() {
           username: loginUsername,
           password: loginPassword,
         }),
+        credentials: "include", // ✅ Required to include cookies
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Login failed");
