@@ -213,23 +213,14 @@ export const deleteTherapySession = async(req, res) => {
 };
 
 
-
-
 export const selectSession = async(req, res) => {
     try {
         const sessionId = req.params.id;
         const token = req.cookies.token;
-
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const userId = decoded.userId;
 
-
-        console.log("sessionid is  " + sessionId);
-        console.log("token is  " + token);
-        console.log("");
-
-
-
+        // Fetch & populate
         const session = await TherapySession.findById(sessionId)
             .populate("emotion_records")
             .populate("chat_sessions")
@@ -238,22 +229,28 @@ export const selectSession = async(req, res) => {
         if (!session) {
             return res.status(404).json({ error: "Therapy session not found." });
         }
-        // ✅ Ensure the session belongs to the logged-in user
         if (session.patient_id.toString() !== userId) {
             return res.status(403).json({ error: "Forbidden: This is not your session" });
         }
 
-        // ✅ Store session ID in cookie
+        // ─── UPDATE end_time ─────────────────────────────────────────────
+        session.end_time = new Date();
+        await session.save();
+        // ─────────────────────────────────────────────────────────────────
+
+        // Store in cookie
         res.cookie("activeSessionId", sessionId, {
             httpOnly: true,
             sameSite: "Lax",
-            maxAge: 24 * 60 * 60 * 1000, // 1 day
+            maxAge: 24 * 60 * 60 * 1000,
         });
 
+        // Return the updated session
         res.status(200).json({
-            message: "Session selected successfully and stored in cookie.",
+            message: "Session selected and end_time updated.",
             session,
         });
+
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -263,22 +260,23 @@ export const selectSession = async(req, res) => {
 
 export const getAllSessionsOfUser = async(req, res) => {
     try {
-        // ✅ Extract token from cookie and decode
-        console.log("iam here in the function");
         const token = req.cookies.token;
-        if (!token) return res.status(401).json({ error: "Unauthorized. No token." });
+        if (!token) {
+            return res.status(401).json({ error: "Unauthorized. No token." });
+        }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const userId = decoded.userId;
 
-        // ✅ Find all therapy sessions for this user
-        const sessions = await TherapySession.find({ patient_id: userId })
+        const sessions = await TherapySession
+            .find({ patient_id: userId })
+            .sort({ end_time: -1 }) // ← sort by end_time descending
             .populate("emotion_records")
             .populate("chat_sessions")
             .populate("game_sessions");
 
-        res.status(200).json(sessions);
+        return res.status(200).json(sessions);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        return res.status(500).json({ error: error.message });
     }
 };
