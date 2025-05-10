@@ -51,7 +51,7 @@ export default function FloatingHistoryPanel() {
           isOpen ? "translate-x-0" : "-translate-x-full"
         } z-50 flex flex-col w-64 border-r border-white/10`}
       >
-        <div className="p-4 border-b border-gray-700 bg-gray-800/50 flex justify-between items-center">
+        <div className="px-4 pt-4 bg-gray-800/50 flex justify-between items-center">
           <h2 className="text-lg font-semibold text-white">Chat History</h2>
           <button
             onClick={togglePanel}
@@ -71,6 +71,22 @@ export default function FloatingHistoryPanel() {
             >
               <path d="M15 18l-6-6 6-6" />
             </svg>
+          </button>
+        </div>
+
+        {/* New Session Button */}
+        <div className="px-4 py-2 border-b border-gray-700 bg-gray-800/40">
+          <button
+            className="w-full bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium py-2 px-3 rounded-md transition"
+            onClick={() => {
+
+              
+
+
+
+            }}
+          >
+            + New Session
           </button>
         </div>
 
