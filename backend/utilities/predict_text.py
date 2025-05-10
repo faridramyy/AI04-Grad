@@ -6,7 +6,7 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 def load_all_models(data_type):
-    MODELS_DIR = "../models/" + data_type + "/exported_files/"
+    MODELS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "models", data_type, "exported_files"))
     models = {}
 
     for file in os.listdir(MODELS_DIR):
@@ -38,10 +38,14 @@ def main():
         print("❌ Please provide a sentence as a command-line argument.")
         return
 
-    sentence = sys.argv[1]
+    sentence = " ".join(sys.argv[1:])  # Supports multi-word input without quotes
 
     try:
         models_dict = load_all_models("text")
+
+        if not models_dict:
+            print("❌ No models were loaded. Check the model directory.")
+            return
 
         model_weights = {
             "cnn": 0.35,
@@ -71,8 +75,10 @@ def main():
 
         final_prediction = max(weighted_votes, key=weighted_votes.get)
 
-        print(f"Predictions: {predictions}")
-        print(f"Final Prediction: {final_prediction}")
+        print("✅ Individual Model Predictions:")
+        for name, pred in predictions.items():
+            print(f" - {name}: {pred}")
+        print(f"\n🎯 Final Ensemble Prediction: {final_prediction}")
 
     except Exception as e:
         print(f"❌ Error: {str(e)}")
