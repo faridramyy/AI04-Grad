@@ -57,49 +57,45 @@ export const getTherapySessionById = async(req, res) => {
  * }
  */
 
-
 export const createTherapySession = async(req, res) => {
     try {
-
+        // ─── Auth ────────────────────────────────────────────────
         const token = req.cookies.token;
         if (!token) return res.status(401).json({ error: "Unauthorized. No token." });
-
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const userId = decoded.userId;
+
+        // ─── Pull & validate body ─────────────────────────────────
         const {
             patient_id = userId,
                 patient_emotion,
                 start_time,
                 end_time,
-                stress_score_before = 0,
-                stress_score_after = 0,
                 emotion_records = [],
                 chat_sessions = [],
                 game_sessions = [],
                 challenges_sessions = [],
         } = req.body;
 
-        // ✅ Check required fields
-        if (!patient_id || !patient_emotion || !start_time || !end_time) {
-            return res
-                .status(400)
-                .json({ error: "Missing required fields (patient_id, emotion, start/end time)." });
+        if (!patient_emotion || !start_time || !end_time) {
+            return res.status(400).json({
+                error: "Missing required fields: patient_emotion, start_time, end_time.",
+            });
         }
 
-        // ✅ Validate patient exists
+        // ─── Check patient exists ──────────────────────────────────
         const user = await User.findById(patient_id);
-        console.log(" i am validating the user and user is" + user);
         if (!user) {
-            return res.status(404).json({ error: "User not found with the provided patient_id." });
+            return res.status(404).json({ error: "User (patient) not found." });
         }
 
-        // ✅ Validate emotion value
-        const allowedEmotions = ["neutral", "happy", "sad", "fear"];
-        if (!allowedEmotions.includes(patient_emotion)) {
+        // ─── Validate emotion ─────────────────────────────────────
+        const allowed = ["neutral", "happy", "sad", "fear", "disgust", "angry", "depressed"];
+        if (!allowed.includes(patient_emotion)) {
             return res.status(400).json({ error: "Invalid patient_emotion value." });
         }
 
-        // ✅ Create the therapy session object
+        // ─── Create & save session ─────────────────────────────────
         const newSession = new TherapySession({
             patient_id,
             patient_emotion,
@@ -112,17 +108,27 @@ export const createTherapySession = async(req, res) => {
             game_sessions,
             challenges_sessions,
         });
-
         const savedSession = await newSession.save();
 
-        // ✅ Update user to push session ID
+        // ─── Push into user's list ────────────────────────────────
         user.ai_sessions_id.push(savedSession._id);
         await user.save();
 
-        res.status(201).json(savedSession);
+        // ─── Set as active session cookie ──────────────────────────
+        res.cookie("activeSessionId", savedSession._id.toString(), {
+            httpOnly: true,
+            sameSite: "Lax",
+            maxAge: 24 * 60 * 60 * 1000, // 1 day
+        });
+
+        // ─── Response ──────────────────────────────────────────────
+        return res.status(201).json({
+            message: "Therapy session created and set as active.",
+            session: savedSession,
+        });
     } catch (err) {
         console.error("Error creating therapy session:", err);
-        res.status(500).json({ error: err.message });
+        return res.status(500).json({ error: err.message });
     }
 };
 
