@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import SettingsModal from "./SettingsModal";
 import { Link } from "react-router-dom";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 export default function ProfilePic() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -94,7 +95,13 @@ export default function ProfilePic() {
 
           <button
             className="flex items-center w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-800/50"
-            onClick={() => console.log("Log out clicked")}
+            onClick={async () => {
+              await fetch(`${BACKEND_URL}/api/users/logout`, {
+                method: "POST",
+                credentials: "include", // Important to send cookies
+              });
+              window.location.href = "/";
+            }}
           >
             <svg
               className="w-4 h-4 mr-2 text-red-400"

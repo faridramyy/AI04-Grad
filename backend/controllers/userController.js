@@ -168,6 +168,25 @@ export const createUser = async (req, res) => {
   }
 };
 
+
+export const logoutUser = (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "Lax",
+  });
+
+  res.clearCookie("activeSessionId", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "Lax",
+  });
+
+  return res.status(200).json({ message: "Logged out successfully" });
+};
+
+
+
 // /**
 //  * @route   GET /api/users
 //  * @desc    Fetch all users (populates ai_sessions)

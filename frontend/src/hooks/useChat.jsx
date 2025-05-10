@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
-const backendUrl = "http://localhost:3000";
-
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 const ChatContext = createContext();
 
 export const ChatProvider = ({ children }) => {
@@ -12,13 +12,12 @@ export const ChatProvider = ({ children }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [isVideoRecording, setIsVideoRecording] = useState(false);
 
-  // Function to send text messages
   const chatText = async (message) => {
-    if (loading || messages.length > 0) return; // Prevent sending if already loading or there are pending messages
+    if (loading || messages.length > 0) return;
 
     setLoading(true);
     try {
-      const data = await fetch(`${backendUrl}/api/therapy-reply/text`, {
+      const data = await fetch(`${BACKEND_URL}/api/therapy-reply/text`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -29,14 +28,14 @@ export const ChatProvider = ({ children }) => {
       setMessages((messages) => [...messages, ...resp]);
     } catch (error) {
       console.error("Error sending text message:", error);
+      toast.error("Error sending text message.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Function to send audio messages
   const chatAudio = async (audioBlob, audioDuration) => {
-    if (loading || messages.length > 0) return; // Prevent sending if already loading
+    if (loading || messages.length > 0) return;
 
     setLoading(true);
     try {
@@ -44,49 +43,12 @@ export const ChatProvider = ({ children }) => {
       formData.append("audio", audioBlob, "recording.webm");
       formData.append("duration", audioDuration);
 
-      const response = await fetch(`${backendUrl}/api/therapy-reply/audio`, {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await response.json(); // Get full response
-
-      console.log(data)
-
-      if (!response.ok) {
-        // If backend returns error (400, 500), throw it
-        throw new Error(data.error || "Unknown error from server");
-      }
-
-      if (!Array.isArray(data.messages)) {
-        throw new Error("Invalid response format: messages not found");
-      }
-
-      setMessages((messages) => [...messages, ...data.messages]); // <-- Use data.messages safely now
-    } catch (error) {
-      alert("Error sending audio message:", error.message || error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Function to send video messages
-  const chatVideo = async (videoBlob, videoDuration) => {
-    if (loading || messages.length > 0) return; // Prevent sending if already loading
-
-    setLoading(true);
-    try {
-      const formData = new FormData();
-      formData.append("video", videoBlob, "recording.webm");
-      formData.append("duration", videoDuration);
-
-      const response = await fetch(`${backendUrl}/api/therapy-reply/video`, {
+      const response = await fetch(`${BACKEND_URL}/api/therapy-reply/audio`, {
         method: "POST",
         body: formData,
       });
 
       const data = await response.json();
-
       console.log(data);
 
       if (!response.ok) {
@@ -99,41 +61,63 @@ export const ChatProvider = ({ children }) => {
 
       setMessages((messages) => [...messages, ...data.messages]);
     } catch (error) {
-      alert("Error sending video message: " + (error.message || error));
+      toast.error(`Audio error: ${error.message || "Unknown error"}`);
     } finally {
       setLoading(false);
     }
   };
 
-  // For direct recording state management
+  const chatVideo = async (videoBlob, videoDuration) => {
+    if (loading || messages.length > 0) return;
+
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("video", videoBlob, "recording.webm");
+      formData.append("duration", videoDuration);
+
+      const response = await fetch(`${BACKEND_URL}/api/therapy-reply/video`, {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+      console.log(data);
+
+      if (!response.ok) {
+        throw new Error(data.error || "Unknown error from server");
+      }
+
+      if (!Array.isArray(data.messages)) {
+        throw new Error("Invalid response format: messages not found");
+      }
+
+      setMessages((messages) => [...messages, ...data.messages]);
+    } catch (error) {
+      toast.error(`Video error: ${error.message || "Unknown error"}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const startRecording = () => {
-    if (loading || messages.length > 0) return; // Don't start recording if busy
+    if (loading || messages.length > 0) return;
     setIsRecording(true);
   };
 
-  const stopRecording = () => {
-    setIsRecording(false);
-  };
-
+  const stopRecording = () => setIsRecording(false);
   const startVideoRecording = () => {
-    if (loading || messages.length > 0) return; // Don't start recording if busy
+    if (loading || messages.length > 0) return;
     setIsVideoRecording(true);
   };
-
-  const stopVideoRecording = () => {
-    setIsVideoRecording(false);
-  };
+  const stopVideoRecording = () => setIsVideoRecording(false);
 
   const onMessagePlayed = () => {
     setMessages((messages) => messages.slice(1));
   };
 
   useEffect(() => {
-    if (messages.length > 0) {
-      setMessage(messages[0]);
-    } else {
-      setMessage(null);
-    }
+    setMessage(messages.length > 0 ? messages[0] : null);
   }, [messages]);
 
   return (
