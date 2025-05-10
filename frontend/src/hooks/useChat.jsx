@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 const backendUrl = "http://localhost:3000";
-
 const ChatContext = createContext();
 
 export const ChatProvider = ({ children }) => {
@@ -12,9 +12,8 @@ export const ChatProvider = ({ children }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [isVideoRecording, setIsVideoRecording] = useState(false);
 
-  // Function to send text messages
   const chatText = async (message) => {
-    if (loading || messages.length > 0) return; // Prevent sending if already loading or there are pending messages
+    if (loading || messages.length > 0) return;
 
     setLoading(true);
     try {
@@ -29,14 +28,14 @@ export const ChatProvider = ({ children }) => {
       setMessages((messages) => [...messages, ...resp]);
     } catch (error) {
       console.error("Error sending text message:", error);
+      toast.error("Error sending text message.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Function to send audio messages
   const chatAudio = async (audioBlob, audioDuration) => {
-    if (loading || messages.length > 0) return; // Prevent sending if already loading
+    if (loading || messages.length > 0) return;
 
     setLoading(true);
     try {
@@ -49,12 +48,10 @@ export const ChatProvider = ({ children }) => {
         body: formData,
       });
 
-      const data = await response.json(); // Get full response
-
-      console.log(data)
+      const data = await response.json();
+      console.log(data);
 
       if (!response.ok) {
-        // If backend returns error (400, 500), throw it
         throw new Error(data.error || "Unknown error from server");
       }
 
@@ -62,17 +59,16 @@ export const ChatProvider = ({ children }) => {
         throw new Error("Invalid response format: messages not found");
       }
 
-      setMessages((messages) => [...messages, ...data.messages]); // <-- Use data.messages safely now
+      setMessages((messages) => [...messages, ...data.messages]);
     } catch (error) {
-      alert("Error sending audio message:", error.message || error);
+      toast.error(`Audio error: ${error.message || "Unknown error"}`);
     } finally {
       setLoading(false);
     }
   };
 
-  // Function to send video messages
   const chatVideo = async (videoBlob, videoDuration) => {
-    if (loading || messages.length > 0) return; // Prevent sending if already loading
+    if (loading || messages.length > 0) return;
 
     setLoading(true);
     try {
@@ -86,7 +82,6 @@ export const ChatProvider = ({ children }) => {
       });
 
       const data = await response.json();
-
       console.log(data);
 
       if (!response.ok) {
@@ -99,41 +94,30 @@ export const ChatProvider = ({ children }) => {
 
       setMessages((messages) => [...messages, ...data.messages]);
     } catch (error) {
-      alert("Error sending video message: " + (error.message || error));
+      toast.error(`Video error: ${error.message || "Unknown error"}`);
     } finally {
       setLoading(false);
     }
   };
 
-  // For direct recording state management
   const startRecording = () => {
-    if (loading || messages.length > 0) return; // Don't start recording if busy
+    if (loading || messages.length > 0) return;
     setIsRecording(true);
   };
 
-  const stopRecording = () => {
-    setIsRecording(false);
-  };
-
+  const stopRecording = () => setIsRecording(false);
   const startVideoRecording = () => {
-    if (loading || messages.length > 0) return; // Don't start recording if busy
+    if (loading || messages.length > 0) return;
     setIsVideoRecording(true);
   };
-
-  const stopVideoRecording = () => {
-    setIsVideoRecording(false);
-  };
+  const stopVideoRecording = () => setIsVideoRecording(false);
 
   const onMessagePlayed = () => {
     setMessages((messages) => messages.slice(1));
   };
 
   useEffect(() => {
-    if (messages.length > 0) {
-      setMessage(messages[0]);
-    } else {
-      setMessage(null);
-    }
+    setMessage(messages.length > 0 ? messages[0] : null);
   }, [messages]);
 
   return (
