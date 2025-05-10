@@ -58,6 +58,8 @@ export const ChatProvider = ({ children }) => {
       const response = await fetch(`${BACKEND_URL}/api/therapy-reply/audio`, {
         method: "POST",
         body: formData,
+        credentials: "include",
+
       });
 
       const data = await response.json();
@@ -91,6 +93,7 @@ export const ChatProvider = ({ children }) => {
       const response = await fetch(`${BACKEND_URL}/api/therapy-reply/video`, {
         method: "POST",
         body: formData,
+        credentials: "include",
       });
 
       const data = await response.json();

@@ -492,6 +492,43 @@ export const videoReply = async (req, res) => {
         }
 
         //save data to database
+        const sessionId = req.cookies.activeSessionId;
+        if (!sessionId)
+          return res.status(400).json({ error: "No active session selected" });
+
+        const token = req.cookies.token;
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const userId = decoded.userId;
+        if (!userId)
+          return res
+            .status(400)
+            .json({ error: "Invalid token or user ID missing" });
+
+        const replyTextOnly = messages.map((msg) => msg.text).join(" "); // Assuming each message has a .text property
+        const userMessage = transcribedText; // This is the actual user message (transcribed from video)
+
+        const newMsg = await AI_Message.create({
+          sender_id: userId,
+          message_text: userMessage,
+          response: replyTextOnly,
+          chat_session_id: sessionId,
+        });
+
+        await TherapySession.findByIdAndUpdate(sessionId, {
+          $push: { chat_sessions: newMsg._id },
+        });
+
+        const newEmotion = await ExtractedEmotion.create({
+          session_id: sessionId,
+          extracted_emotion: emotion_extracted,
+          uploaded_data_type: "video",
+          file_paths: outputPath,
+        });
+
+        // Update TherapySession to include this emotion
+        await TherapySession.findByIdAndUpdate(sessionId, {
+          $push: { emotion_records: newEmotion._id },
+        });
 
         res.send({ messages });
       } catch (err) {
