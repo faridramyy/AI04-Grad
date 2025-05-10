@@ -51,20 +51,24 @@ export const signinUser = async (req, res) => {
       res.cookie("activeSessionId", recentSession._id.toString(), cookieOpts);
     }
 
-    // 6. Send response
-    return res.status(200).json({
-      message: "Signed in successfully",
-      token,
-      user: {
-        id: user._id,
-        role: user.role,
-        username: user.username,
-      },
-      activeSessionId: recentSession._id || null,
-    });
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
-  }
+        // 6. Send response
+        return res.status(200).json({
+            message: "Signed in successfully",
+            token,
+            user: {
+                id: user._id,
+                role: user.role,
+                username: user.username,
+            },
+            activeSessionId: recentSession ?
+                recentSession._id :
+                null,
+
+        });
+
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
 };
 
 // /**
