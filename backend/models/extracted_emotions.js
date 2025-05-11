@@ -10,7 +10,6 @@ const ExtractedEmotionSchema = new mongoose.Schema({
   created_at: { type: Date, default: Date.now },
   extracted_emotion: {
     type: String,
-    enum: ["happy", "sad", "fear", "angry", "surprised", "neutral"],
     required: true,
   },
   uploaded_data_type: {
