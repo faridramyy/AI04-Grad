@@ -1,16 +1,17 @@
 import express from "express";
 import {
-    getAllGameSessions,
-    getGameSessionById,
-    createGameSession,
-    updateGameSession,
-    deleteGameSession,
-    recordInitialStress
-
+  getAllGameSessions,
+  getGameSessionById,
+  createGameSession,
+  updateGameSession,
+  deleteGameSession,
+  recordInitialStress,
+  generateScenario,
 } from "../controllers/gameSessionController.js";
 
 const router = express.Router();
 
+router.post("/generate", generateScenario);
 router.get("/", getAllGameSessions);
 router.post("/stress-score", recordInitialStress);
 router.get("/:id", getGameSessionById);
