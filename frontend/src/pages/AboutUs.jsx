@@ -2,6 +2,11 @@ import { useState, useEffect } from "react";
 import { Mail, MapPin, Phone } from "lucide-react";
 import Footer from "../components/Footer";
 import Navigation from "../components/Navigation";
+import rina from '../images/marinaimg.jpg'
+import fery from '../images/farid.jpg'
+import bass from '../images/bassem.jpg'
+import mouf from '../images/moufid.jpg'
+
 
 export default function AboutUs() {
   const [scrolled, setScrolled] = useState(false);
@@ -13,84 +18,71 @@ export default function AboutUs() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
   const team = [
     {
-      name: "Dr. Sarah Johnson",
-      role: "Founder & CEO",
-      bio: "Clinical psychologist with 15+ years of experience. Pioneered the integration of AI and therapy.",
-      image: "https://placehold.co/600x400",
+      name: "Farid Ramy",
+      role: "Team Leader",
+      bio: "Leads the team with strategic vision and oversees all project components.",
+      image: fery,
     },
     {
-      name: "Michael Chen",
-      role: "CTO",
-      bio: "AI researcher with a background in computational psychology and machine learning.",
-      image: "https://placehold.co/600x400",
+      name: "Marina",
+      role: "Audio & Multimodal Specialist",
+      bio: "Focuses on audio emotion models and integrates audio+text for real-time mental analysis.",
+      image: rina,
     },
     {
-      name: "Dr. Amara Patel",
-      role: "Chief Clinical Officer",
-      bio: "Specialist in cognitive behavioral therapy with research focus on digital mental health interventions.",
-      image: "https://placehold.co/600x400",
+      name: "Bassem",
+      role: "EEG & Brainwave Analyst",
+      bio: "Works with the SEED IV dataset and EEG signals to map emotional brain patterns.",
+      image: bass,
     },
     {
-      name: "James Wilson",
-      role: "Head of Product",
-      bio: "Former therapist turned product leader with a passion for accessible mental healthcare.",
-      image: "https://placehold.co/600x400",
-    },
-    {
-      name: "Elena Rodriguez",
-      role: "Head of Research",
-      bio: "Neuroscientist specializing in emotional processing and therapeutic outcomes.",
-      image: "https://placehold.co/600x400",
-    },
-    {
-      name: "David Kim",
-      role: "Chief Ethics Officer",
-      bio: "Expert in AI ethics and privacy with focus on healthcare applications.",
-      image: "https://placehold.co/600x400",
-    },
+      name: "Moufid",
+      role: "Video & Music Therapy Developer",
+      bio: "Builds video-based emotion systems and designs music therapy experiences.",
+      image: mouf,
+    }
   ];
-
   const milestones = [
     {
-      year: 2019,
-      title: "The Beginning",
+      year: 2024,
+      title: "Project Kickoff",
       description:
-        "MindfulAI was founded with a mission to make mental healthcare accessible to everyone.",
-    },
-    {
-      year: 2020,
-      title: "First Prototype",
-      description:
-        "Developed our first AI therapy prototype and began initial testing with volunteer participants.",
-    },
-    {
-      year: 2021,
-      title: "Clinical Validation",
-      description:
-        "Completed our first clinical study showing promising results for anxiety and depression management.",
-    },
-    {
-      year: 2022,
-      title: "Public Launch",
-      description:
-        "Officially launched MindfulAI to the public after extensive testing and refinement.",
-    },
-    {
-      year: 2023,
-      title: "Global Expansion",
-      description:
-        "Expanded to serve clients in over 30 countries and added support for 12 languages.",
+        "The Emotional and Mental Support AI System project officially began in August 2024 with a shared vision among the team.",
     },
     {
       year: 2024,
-      title: "Next Generation",
+      title: "System Architecture & Design",
       description:
-        "Launched our advanced AI model with enhanced emotional intelligence and personalization.",
+        "Completed requirements gathering, initial design of system architecture, and planned multimodal emotion recognition workflows.",
     },
+    {
+      year: 2024,
+      title: "Model Development",
+      description:
+        "Developed and integrated text, audio, and video emotion recognition modules using deep learning and transformer-based approaches.",
+    },
+    {
+      year: 2025,
+      title: "Prototype & Testing",
+      description:
+        "Assembled the full prototype including the AI therapist, stress management game, and music recommendation system for internal testing.",
+    },
+    {
+      year: 2025,
+      title: "Thesis Submission",
+      description:
+        "Finalized documentation, completed evaluation, and submitted the graduation thesis for the AI-powered mental health support platform.",
+    },
+    {
+      year: 2025,
+      title: "Future Vision",
+      description:
+        "Exploring real-world deployment, mobile integration, and collaborations with mental health professionals for broader impact.",
+    }
   ];
+  
 
   const values = [
     {

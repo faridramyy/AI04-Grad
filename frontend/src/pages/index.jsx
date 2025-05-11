@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { MessageSquare, Brain, Shield, ArrowRight } from "lucide-react";
 import Footer from "../components/Footer";
 import Navigation from "../components/Navigation";
+import avatarImg from '../images/avatarre.jpg';
 
 export default function Index() {
   const [scrolled, setScrolled] = useState(false);
@@ -61,12 +62,16 @@ export default function Index() {
               <div className="relative">
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-violet-600 to-cyan-500 rounded-2xl blur-xl opacity-75"></div>
                 <div className="relative bg-[#131A2B]/40 backdrop-blur-sm p-1 rounded-2xl border border-gray-800">
-                  <img
-                    src="https://placehold.co/600x400"
-                    alt="AI Therapy Illustration"
-                    className="rounded-xl max-w-md w-full"
+                <img
+                src={avatarImg}
+                alt="AI Therapy Illustration"
+                  className="rounded-xl max-w-md w-full"
+
                   />
-                </div>
+                    
+                  </div>
+
+
               </div>
             </div>
           </div>

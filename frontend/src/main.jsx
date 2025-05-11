@@ -14,7 +14,7 @@ import Index from "./pages/index";
 import HowItWorks from "./pages/HowItWorks";
 import AboutUs from "./pages/AboutUs";
 import Avatar from "./pages/Avatar";
-import Dashboard from "./pages/Dashboard";
+import Dashboard from "./pages/dashboard";
 import NotFound from "./pages/404";
 import { ChatProvider } from "./hooks/useChat";
 import "./index.css";

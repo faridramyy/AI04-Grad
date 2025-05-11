@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import Footer from "../components/Footer";
 import Navigation from "../components/Navigation";
+import avatarImg from '../images/avatarre.jpg';
+import llm from '../images/llm.jpg'
 
 export default function HowItWorks() {
   const [scrolled, setScrolled] = useState(false);
@@ -151,12 +153,14 @@ export default function HowItWorks() {
             <div className="relative">
               <div className="absolute -inset-0.5 bg-gradient-to-r from-violet-600 to-cyan-500 rounded-2xl blur-sm opacity-75"></div>
               <div className="relative bg-[#131A2B]/40 backdrop-blur-sm p-1 rounded-2xl border border-gray-800">
-                <img
-                  src="https://placehold.co/600x400"
-                  alt="AI Therapy Conversation"
+              <img
+              src={avatarImg}
+              alt="AI Therapy Conversation"
                   className="rounded-xl w-full"
-                />
-              </div>
+
+                  />
+
+                  </div>
             </div>
             <div>
               <h2 className="text-2xl md:text-3xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-cyan-400">
@@ -341,12 +345,15 @@ export default function HowItWorks() {
             </div>
             <div className="relative">
               <div className="absolute -inset-0.5 bg-gradient-to-r from-violet-600 to-cyan-500 rounded-2xl blur-sm opacity-75"></div>
+            
               <div className="relative bg-[#131A2B]/40 backdrop-blur-sm p-1 rounded-2xl border border-gray-800">
-                <img
-                  src="https://placehold.co/600x400"
-                  alt="AI Technology Visualization"
-                  className="rounded-xl w-full"
-                />
+              <img
+              src={llm}
+              alt="AI Technology Visualization"
+              className="rounded-xl w-full"
+
+              />
+
               </div>
             </div>
           </div>
