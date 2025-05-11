@@ -403,7 +403,6 @@ export const dashboardFinalScoreAnalysis = async(req, res) => {
 
 
 
-
 export const allSessionsFinalScoreAnalysis = async(req, res) => {
     try {
         // 1) Auth
@@ -411,24 +410,32 @@ export const allSessionsFinalScoreAnalysis = async(req, res) => {
         if (!token) return res.status(401).json({ error: "Unauthorized." });
         const { userId } = jwt.verify(token, process.env.JWT_SECRET);
 
-        // 2) Load all sessions for this user, with only final_score from game_sessions
+        // 2) Load all sessions, with only final_score & difficulty_level from game_sessions
         const sessions = await TherapySession.find({ patient_id: userId })
             .sort({ start_time: 1 })
             .populate({
                 path: "game_sessions",
-                select: "final_score",
+                select: "final_score difficulty_level",
             });
 
-        // 3) Flatten all final_scores into one array
-        const allValues = sessions.flatMap(sess =>
-            sess.game_sessions.map(g => g.final_score)
-        );
+        // 3) Build flat rows
+        const rows = sessions.flatMap((sess, idx) => {
+            const sessionName = `Session ${idx + 1}`;
+            return sess.game_sessions.map(g => ({
+                sessionName,
+                difficulty: g.difficulty_level,
+                score: g.final_score,
+            }));
+        });
 
-        return res.json({ values: allValues });
+        return res.json({ rows });
     } catch (err) {
         return res.status(500).json({ error: err.message });
     }
 };
+
+
+
 export const getSessionEmotionDistribution = async(req, res) => {
     try {
         // 1) Auth
