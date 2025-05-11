@@ -478,24 +478,37 @@ export const getAllSessionsEmotionDistribution = async(req, res) => {
         if (!token) return res.status(401).json({ error: "Unauthorized." });
         const { userId } = jwt.verify(token, process.env.JWT_SECRET);
 
-        // 2) Load all sessions + their emotion_records.emotion
+        // 2) Load all sessions + only the 'extracted_emotion' field
         const sessions = await TherapySession.find({ patient_id: userId })
+            .sort({ start_time: 1 })
             .populate({
                 path: "emotion_records",
                 select: "extracted_emotion",
             });
-        console.log(sessions);
 
-        // 3) Flatten & count
-        const counts = {};
-        for (const sess of sessions) {
-            for (const rec of sess.emotion_records) {
+        // 3) Aggregate across sessions
+        const agg = {}; // { emotion: { count: number, sessions: Set<string> } }
+
+        sessions.forEach((sess, idx) => {
+            const sessionKey = `session${idx + 1}`; // "session1", etc.
+            sess.emotion_records.forEach((rec) => {
                 const em = rec.extracted_emotion;
-                counts[em] = (counts[em] || 0) + 1;
-            }
-        }
+                if (!agg[em]) {
+                    agg[em] = { count: 0, sessions: new Set() };
+                }
+                agg[em].count += 1;
+                agg[em].sessions.add(sessionKey);
+            });
+        });
 
-        return res.json({ counts });
+        // 4) Build rows
+        const rows = Object.entries(agg).map(([emotion, { count, sessions }]) => ({
+            emotion,
+            count,
+            session: Array.from(sessions).join(","),
+        }));
+
+        return res.json({ rows });
     } catch (err) {
         return res.status(500).json({ error: err.message });
     }
