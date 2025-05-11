@@ -15,6 +15,7 @@ import aiMessageRoutes from "./routes/aiMessageRoutes.js";
 import severeCaseRoutes from "./routes/severeCaseRoutes.js";
 import stressScenarioRoutes from "./routes/stressScenarioRoutes.js";
 import therapyReplyRoutes from "./routes/therapyReplyRoutes.js";
+import musicRoutes from "./routes/music.js";  
 
 const port = secrets.PORT;
 const app = express();
@@ -38,6 +39,7 @@ app.use("/api/user-settings", userSettingsRoutes);
 app.use("/api/ai-messages", aiMessageRoutes);
 app.use("/api/severe-cases", severeCaseRoutes);
 app.use("/api/stress-scenarios", stressScenarioRoutes);
+app.use("/api/music", musicRoutes);  // Add this line to include the music route
 
 app.use("/api/therapy-reply", therapyReplyRoutes);
 
