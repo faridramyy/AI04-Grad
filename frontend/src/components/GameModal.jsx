@@ -16,10 +16,9 @@ export function GameModal({ onClose }) {
   const [history, setHistory] = useState([]);
   const [summary, setSummary] = useState(null);
   const [error, setError] = useState(null);
+
   const getCookie = (name) => {
-    const match = document.cookie.match(
-      new RegExp("(^| )" + name + "=([^;]+)")
-    );
+    const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
     if (match) return decodeURIComponent(match[2]);
     return null;
   };
@@ -30,18 +29,14 @@ export function GameModal({ onClose }) {
       ? 0.5
       : Math.min(1, Math.max(0, Math.round(cookieStress)));
 
-      console.log("Initial stress score from cookie:", validScore);
+    console.log("Initial stress score from cookie:", validScore);
 
     setInitialStressScore(validScore);
     setStressScore(validScore);
     fetchScenario();
   }, []);
 
-  const fetchScenario = async (
-    prevScenario = null,
-    chosenOption = null,
-    score = stressScore
-  ) => {
+  const fetchScenario = async (prevScenario = null, chosenOption = null, score = stressScore) => {
     setIsLoading(true);
     setError(null);
     try {
@@ -139,8 +134,9 @@ export function GameModal({ onClose }) {
         throw new Error(errData.error || "Failed to save session");
       }
 
+      const result = await res.json();
       toast.success("✅ Session successfully saved!");
-      setSummary(report);
+      setSummary({ final_score: result.final_score });
       setFinished(true);
     } catch (err) {
       console.error("❌ Save session error:", err.message);
@@ -268,42 +264,18 @@ export function GameModal({ onClose }) {
                 </div>
               )
             ) : (
-              <div className="p-6 text-white">
-                <div className="text-center mb-6">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-violet-600/20 to-cyan-500/20 mb-4">
-                    <CheckCircle size={32} className="text-cyan-400" />
-                  </div>
-                  <h2 className="text-2xl font-bold mb-2">Session Complete</h2>
-                  <p className="text-gray-300">Your final stress level:</p>
-                  <p className={`text-3xl font-bold ${getStressColor()}`}>
-                    {(stressScore * 40).toFixed(1)} / 40
-                  </p>
-                  <p className={`mt-2 font-medium ${getStressColor()}`}>
-                    {getStressLevel()}
-                  </p>
+              <div className="p-6 text-white text-center">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-violet-600/20 to-cyan-500/20 mb-4">
+                  <CheckCircle size={32} className="text-cyan-400" />
                 </div>
-
-                <div className="bg-[#1E293B]/40 border border-gray-700 rounded-lg p-4">
-                  <h3 className="font-semibold text-lg mb-4">Your Journey:</h3>
-                  {history.map((entry, index) => (
-                    <div key={index} className="mb-3">
-                      <p className="font-medium">
-                        {index + 1}. {entry.scenario}
-                      </p>
-                      <p className="text-sm text-cyan-400 mt-1">
-                        You chose: {entry.selectedOption}
-                      </p>
-                      <p className="text-sm text-gray-400">
-                        Stress after: {(entry.stressAfter * 40).toFixed(1)} / 40
-                      </p>
-                    </div>
-                  ))}
-                </div>
-
-                {summary && (
-                  <pre className="mt-6 text-sm bg-[#1E293B]/60 p-4 rounded-lg text-gray-300 overflow-x-auto">
-                    {JSON.stringify(summary, null, 2)}
-                  </pre>
+                <h2 className="text-2xl font-bold mb-2">Session Complete</h2>
+                <p className="text-gray-300 mb-4">Your final score:</p>
+                {summary?.final_score != null ? (
+                  <p className="text-4xl font-bold text-cyan-400">
+                    {summary.final_score} / 10
+                  </p>
+                ) : (
+                  <p className="text-gray-400">Score not available.</p>
                 )}
 
                 <button
