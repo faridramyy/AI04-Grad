@@ -1,5 +1,5 @@
-import { EMOTION_MAPPING } from '../utils/emotionConfig.js';
-import { getRecommendations } from '../utils/helpers.js';
+  import { EMOTION_MAPPING } from '../utilities/emotionConfig.js';
+import { getRecommendations } from '../utilities/helpers.js';
 import open from 'open';
 
 export const showForm = (req, res) => {
