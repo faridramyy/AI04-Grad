@@ -10,7 +10,9 @@ import {
     selectSession,
     getAllSessionsOfUser,
     dashboardStressAnalysis,
-    allSessionsStressAnalysis
+    allSessionsStressAnalysis,
+    dashboardFinalScoreAnalysis,
+    allSessionsFinalScoreAnalysis
 
 } from "../controllers/therapySessionController.js";
 
@@ -28,6 +30,9 @@ router.put("/:id", authMiddleware("logged"), updateTherapySession);
 router.delete("/:id", authMiddleware("logged"), deleteTherapySession);
 router.get("/:sessionId/stress-chart", dashboardStressAnalysis);
 router.get("/stress-chart/all", allSessionsStressAnalysis);
+router.get("/:sessionId/final-score-chart", dashboardFinalScoreAnalysis);
+router.get("/final-score-chart/all", allSessionsFinalScoreAnalysis);
+
 
 
 export default router;

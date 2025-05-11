@@ -351,3 +351,63 @@ export const allSessionsStressAnalysis = async(req, res) => {
         return res.status(500).json({ error: err.message });
     }
 };
+
+
+export const dashboardFinalScoreAnalysis = async(req, res) => {
+    try {
+        // 1) Auth
+        const token = req.cookies.token;
+        if (!token) return res.status(401).json({ error: "Unauthorized." });
+        const { userId } = jwt.verify(token, process.env.JWT_SECRET);
+
+        // 2) Load session + only final_score from its game_sessions
+        const session = await TherapySession.findById(req.params.sessionId)
+            .populate({
+                path: "game_sessions",
+                select: "final_score",
+            });
+        if (!session) {
+            return res.status(404).json({ error: "Session not found." });
+        }
+        if (session.patient_id.toString() !== userId) {
+            return res.status(403).json({ error: "Forbidden." });
+        }
+
+        // 3) Extract all final_scores
+        const values = session.game_sessions.map(g => g.final_score);
+
+        return res.json({ values });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+};
+
+
+
+
+
+export const allSessionsFinalScoreAnalysis = async(req, res) => {
+    try {
+        // 1) Auth
+        const token = req.cookies.token;
+        if (!token) return res.status(401).json({ error: "Unauthorized." });
+        const { userId } = jwt.verify(token, process.env.JWT_SECRET);
+
+        // 2) Load all sessions for this user, with only final_score from game_sessions
+        const sessions = await TherapySession.find({ patient_id: userId })
+            .sort({ start_time: 1 })
+            .populate({
+                path: "game_sessions",
+                select: "final_score",
+            });
+
+        // 3) Flatten all final_scores into one array
+        const allValues = sessions.flatMap(sess =>
+            sess.game_sessions.map(g => g.final_score)
+        );
+
+        return res.json({ values: allValues });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+};
