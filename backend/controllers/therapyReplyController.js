@@ -13,45 +13,45 @@ const genAI = new GoogleGenerativeAI(secrets.GOOGLE_API_KEY);
 const elevenLabsApiKey = secrets.ELEVEN_LABS_API_KEY;
 
 const elevenlabs = new ElevenLabsClient({
-  apiKey: elevenLabsApiKey,
+    apiKey: elevenLabsApiKey,
 });
 
 const execCommand = (command) => {
-  return new Promise((resolve, reject) => {
-    exec(command, (error, stdout, stderr) => {
-      if (error) reject(error);
-      resolve(stdout);
+    return new Promise((resolve, reject) => {
+        exec(command, (error, stdout, stderr) => {
+            if (error) reject(error);
+            resolve(stdout);
+        });
     });
-  });
 };
 
-const lipSyncMessage = async (message) => {
-  const time = new Date().getTime();
-  console.log(`Starting conversion for message ${message}`);
-  await execCommand(
-    `ffmpeg -y -i audios/message_${message}.mp3 audios/message_${message}.wav`
-  );
-  console.log(`Conversion done in ${new Date().getTime() - time}ms`);
-  await execCommand(
-    `./bin/rhubarb -f json -o audios/message_${message}.json audios/message_${message}.wav -r phonetic`
-  );
-  console.log(`Lip sync done in ${new Date().getTime() - time}ms`);
+const lipSyncMessage = async(message) => {
+    const time = new Date().getTime();
+    console.log(`Starting conversion for message ${message}`);
+    await execCommand(
+        `ffmpeg -y -i audios/message_${message}.mp3 audios/message_${message}.wav`
+    );
+    console.log(`Conversion done in ${new Date().getTime() - time}ms`);
+    await execCommand(
+        `./bin/rhubarb -f json -o audios/message_${message}.json audios/message_${message}.wav -r phonetic`
+    );
+    console.log(`Lip sync done in ${new Date().getTime() - time}ms`);
 };
 
-const readJsonTranscript = async (file) => {
-  const data = await fs.readFile(file, "utf8");
-  return JSON.parse(data);
+const readJsonTranscript = async(file) => {
+    const data = await fs.readFile(file, "utf8");
+    return JSON.parse(data);
 };
 
-const audioFileToBase64 = async (file) => {
-  const data = await fs.readFile(file);
-  return data.toString("base64");
+const audioFileToBase64 = async(file) => {
+    const data = await fs.readFile(file);
+    return data.toString("base64");
 };
 
-const generateTherapyReply = async (userMessage) => {
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const generateTherapyReply = async(userMessage) => {
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-  const therapyPrompt = `
+    const therapyPrompt = `
     You are a compassionate and supportive therapist.
     You listen carefully, show empathy, and help users explore their feelings.
     Avoid giving direct advice. Instead, ask gentle, open-ended questions that encourage reflection.
@@ -94,497 +94,491 @@ const generateTherapyReply = async (userMessage) => {
   ]
   `;
 
-  const result = await model.generateContent({
-    contents: [
-      {
-        parts: [{ text: therapyPrompt }, { text: userMessage }],
-      },
-    ],
-  });
+    const result = await model.generateContent({
+        contents: [{
+            parts: [{ text: therapyPrompt }, { text: userMessage }],
+        }, ],
+    });
 
-  return result.response.text();
+    return result.response.text();
 };
 
-const generateAudioAndLipSync = async (obj, index) => {
-  const fileName = `audios/message_${index}.mp3`;
+const generateAudioAndLipSync = async(obj, index) => {
+    const fileName = `audios/message_${index}.mp3`;
 
-  const text = obj.text;
+    const text = obj.text;
 
-  console.log(text);
+    console.log(text);
 
-  const audio = await elevenlabs.generate({
-    voice: "Sarah",
-    text,
-    model_id: "eleven_multilingual_v2",
-  });
+    const audio = await elevenlabs.generate({
+        voice: "Sarah",
+        text,
+        model_id: "eleven_multilingual_v2",
+    });
 
-  await fs.writeFile(fileName, audio, "binary");
-  await lipSyncMessage(index);
+    await fs.writeFile(fileName, audio, "binary");
+    await lipSyncMessage(index);
 
-  return {
-    text,
-    audio: await audioFileToBase64(fileName),
-    lipsync: await readJsonTranscript(`audios/message_${index}.json`),
-    facialExpression: obj.facialExpression,
-    animation: obj.animation,
-  };
+    return {
+        text,
+        audio: await audioFileToBase64(fileName),
+        lipsync: await readJsonTranscript(`audios/message_${index}.json`),
+        facialExpression: obj.facialExpression,
+        animation: obj.animation,
+    };
 };
 
-const sendDefaultIntro = async (res) => {
-  res.send({
-    messages: [
-      {
-        text: "Hey dear... How was your day?",
-        audio: await audioFileToBase64("audios/intro_0.wav"),
-        lipsync: await readJsonTranscript("audios/intro_0.json"),
-        facialExpression: "smile",
-        animation: "Talking_1",
-      },
-    ],
-  });
+const sendDefaultIntro = async(res) => {
+    res.send({
+        messages: [{
+            text: "Hey dear... How was your day?",
+            audio: await audioFileToBase64("audios/intro_0.wav"),
+            lipsync: await readJsonTranscript("audios/intro_0.json"),
+            facialExpression: "smile",
+            animation: "Talking_1",
+        }, ],
+    });
 };
 
-const sendMissingKeysMessage = async (res) => {
-  res.send({
-    messages: [
-      {
-        text: "Please my dear, don't forget to add your API keys!",
-        audio: await audioFileToBase64("audios/api_0.wav"),
-        lipsync: await readJsonTranscript("audios/api_0.json"),
-        facialExpression: "angry",
-        animation: "Angry",
-      },
-    ],
-  });
+const sendMissingKeysMessage = async(res) => {
+    res.send({
+        messages: [{
+            text: "Please my dear, don't forget to add your API keys!",
+            audio: await audioFileToBase64("audios/api_0.wav"),
+            lipsync: await readJsonTranscript("audios/api_0.json"),
+            facialExpression: "angry",
+            animation: "Angry",
+        }, ],
+    });
 };
 
 const extractFinalPrediction = (stdout) => {
-  const match = stdout.match(/🎯 Final Ensemble Prediction:\s*(\w+)/);
-  return match ? match[1] : null;
+    const match = stdout.match(/🎯 Final Ensemble Prediction:\s*(\w+)/);
+    return match ? match[1] : null;
 };
 
-const predictEmotionFromText = async (text) => {
-  const pythonScriptPath = path.join(
-    process.cwd(),
-    "utilities",
-    "predict_text.py"
-  );
-  const command = `python3 "${pythonScriptPath}" "${text.replace(
+const predictEmotionFromText = async(text) => {
+    const pythonScriptPath = path.join(
+        process.cwd(),
+        "utilities",
+        "predict_text.py"
+    );
+    const command = `python3 "${pythonScriptPath}" "${text.replace(
     /"/g,
     '\\"'
   )}"`;
-  const output = await execCommand(command);
-  const prediction = extractFinalPrediction(output);
-  console.log("🎯 Final Emotion Prediction:", prediction);
-  return prediction;
+    const output = await execCommand(command);
+    const prediction = extractFinalPrediction(output);
+    console.log("🎯 Final Emotion Prediction:", prediction);
+    return prediction;
 };
 
-export const textReply = async (req, res) => {
-  const userMessage = req.body.message;
+export const textReply = async(req, res) => {
+    const userMessage = req.body.message;
 
-  console.log(userMessage);
+    console.log(userMessage);
 
-  if (!userMessage) {
-    await sendDefaultIntro(res);
-    return;
-  }
-
-  if (!elevenLabsApiKey || !process.env.GOOGLE_API_KEY) {
-    await sendMissingKeysMessage(res);
-    return;
-  }
-
-  try {
-    const emotion_extracted = await predictEmotionFromText(userMessage);
-    console.log("🎯 Final Emotion Extracted:", emotion_extracted);
-
-    const answer = await generateTherapyReply(userMessage);
-    const responseArray = JSON.parse(answer);
-
-    const replyTextOnly = responseArray.map((item) => item.text).join("\n");
-
-    const messages = [];
-    for (let i = 0; i < responseArray.length; i++) {
-      const message = await generateAudioAndLipSync(responseArray[i], i);
-      messages.push(message);
+    if (!userMessage) {
+        await sendDefaultIntro(res);
+        return;
     }
 
-    // Save data to database
-    const sessionId = req.cookies.activeSessionId;
-    if (!sessionId) {
-      return res.status(400).json({ error: "No active session selected" });
+    if (!elevenLabsApiKey || !process.env.GOOGLE_API_KEY) {
+        await sendMissingKeysMessage(res);
+        return;
     }
-
-    const token = req.cookies.token;
-    let decoded;
-    try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET);
-    } catch (err) {
-      return res.status(401).json({ error: "Invalid or expired token" });
-    }
-
-    const userId = decoded?.userId;
-    if (!userId) {
-      return res.status(400).json({ error: "No active session selected" });
-    }
-
-    const newMsg = await AI_Message.create({
-      sender_id: userId,
-      message_text: userMessage,
-      response: replyTextOnly,
-      chat_session_id: sessionId,
-    });
-
-    await TherapySession.findByIdAndUpdate(sessionId, {
-      $push: { chat_sessions: newMsg._id },
-    });
-
-    const newEmotion = await ExtractedEmotion.create({
-      session_id: sessionId,
-      extracted_emotion: emotion_extracted,
-      uploaded_data_type: "text",
-      file_paths: "none",
-    });
-
-    await TherapySession.findByIdAndUpdate(sessionId, {
-      $push: { emotion_records: newEmotion._id },
-    });
-
-    res.send({ messages });
-  } catch (error) {
-    console.error("Error:", error);
-    res.status(500).send({
-      messages: [],
-      error: "Failed to get response from Gemini",
-    });
-  }
-};
-
-export const audioReply = async (req, res) => {
-  try {
-    const file = req.file;
-    const duration = req.body.duration;
-
-    if (!file || file.size < 500) {
-      return res
-        .status(400)
-        .json({ error: "Uploaded file is empty or too small." });
-    }
-
-    console.log(`Audio file saved at: ${file.path}`);
-    console.log(`Audio duration: ${duration} seconds`);
-
-    const inputPath = file.path;
-    const outputPath = inputPath.replace(path.extname(inputPath), ".wav");
-
-    // Convert audio from webm to WAV
-    await new Promise((resolve, reject) => {
-      exec(
-        `ffmpeg -y -i "${inputPath}" "${outputPath}"`,
-        (error, stdout, stderr) => {
-          if (error) {
-            console.error("Error converting to WAV:", stderr || error.message);
-            return reject(error);
-          }
-          console.log("Conversion to WAV successful");
-          resolve();
-        }
-      );
-    });
 
     try {
-      await fs.unlink(inputPath);
-      console.log("Original uploaded file deleted:", inputPath);
-    } catch (unlinkError) {
-      console.warn("Failed to delete original file:", unlinkError.message);
-    }
+        const emotion_extracted = await predictEmotionFromText(userMessage);
+        console.log("🎯 Final Emotion Extracted:", emotion_extracted);
 
-    const pythonScriptPath = path.join(
-      process.cwd(),
-      "utilities",
-      "audioOrVideoToText.py"
-    );
-    const pythonExecutable =
-      process.platform === "win32" ? "python" : "python3";
-
-    const python = spawn(pythonExecutable, [pythonScriptPath, outputPath]);
-
-    let transcription = "";
-    let errorOutput = "";
-
-    python.stdout.on("data", (data) => {
-      transcription += data.toString();
-    });
-
-    python.stderr.on("data", (data) => {
-      errorOutput += data.toString();
-    });
-
-    python.on("close", async (code) => {
-      if (code !== 0) {
-        console.error("Transcription failed:", errorOutput);
-        return res
-          .status(500)
-          .json({ error: "Transcription failed", details: errorOutput });
-      }
-
-      try {
-        const transcribedText = transcription.trim();
-        console.log("Transcribed Text:", transcribedText);
-
-        const answer = await generateTherapyReply(transcribedText);
+        const answer = await generateTherapyReply(userMessage);
         const responseArray = JSON.parse(answer);
-        const replyTextOnly2 = responseArray
-          .map((item) => item.text)
-          .join("\n");
-        console.log(responseArray);
+
+        const replyTextOnly = responseArray.map((item) => item.text).join("\n");
 
         const messages = [];
         for (let i = 0; i < responseArray.length; i++) {
-          const message = await generateAudioAndLipSync(responseArray[i], i);
-          messages.push(message);
+            const message = await generateAudioAndLipSync(responseArray[i], i);
+            messages.push(message);
         }
 
+        // Save data to database
         const sessionId = req.cookies.activeSessionId;
         if (!sessionId) {
-          return res.status(400).json({ error: "No active session selected" });
+            return res.status(400).json({ error: "No active session selected" });
         }
 
         const token = req.cookies.token;
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const userId = decoded.userId;
-        if (!userId) {
-          return res
-            .status(400)
-            .json({ error: "Invalid token or user ID missing" });
+        let decoded;
+        try {
+            decoded = jwt.verify(token, process.env.JWT_SECRET);
+        } catch (err) {
+            return res.status(401).json({ error: "Invalid or expired token" });
         }
 
-        const replyTextOnly = messages.map((msg) => msg.text).join(" ");
-        const userMessage = transcribedText;
+        const userId = decoded ? .userId;
+        if (!userId) {
+            return res.status(400).json({ error: "No active session selected" });
+        }
 
         const newMsg = await AI_Message.create({
-          sender_id: userId,
-          message_text: userMessage,
-          response: replyTextOnly2,
-          chat_session_id: sessionId,
+            sender_id: userId,
+            message_text: userMessage,
+            response: replyTextOnly,
+            chat_session_id: sessionId,
         });
 
         await TherapySession.findByIdAndUpdate(sessionId, {
-          $push: { chat_sessions: newMsg._id },
+            $push: { chat_sessions: newMsg._id },
         });
 
         const newEmotion = await ExtractedEmotion.create({
-          session_id: sessionId,
-          extracted_emotion: "neutral",
-          uploaded_data_type: "audio",
-          file_paths: outputPath,
+            session_id: sessionId,
+            extracted_emotion: emotion_extracted,
+            uploaded_data_type: "text",
+            file_paths: "none",
         });
 
         await TherapySession.findByIdAndUpdate(sessionId, {
-          $push: { emotion_records: newEmotion._id },
+            $push: { emotion_records: newEmotion._id },
         });
 
         res.send({ messages });
-      } catch (err) {
-        console.error("Error processing transcription:", err);
-        return res
-          .status(500)
-          .json({ error: "Failed to process transcription output." });
-      }
-    });
+    } catch (error) {
+        console.error("Error:", error);
+        res.status(500).send({
+            messages: [],
+            error: "Failed to get response from Gemini",
+        });
+    }
+};
 
-    python.on("error", (error) => {
-      console.error("Failed to start Python process:", error.message);
-      res.status(500).json({
-        error: "Failed to start Python script",
-        details: error.message,
-      });
-    });
-  } catch (error) {
-    console.error("Unexpected error:", error);
-    res
-      .status(500)
-      .json({ error: "Failed to process audio", details: error.message });
-  }
+export const audioReply = async(req, res) => {
+    try {
+        const file = req.file;
+        const duration = req.body.duration;
+
+        if (!file || file.size < 500) {
+            return res
+                .status(400)
+                .json({ error: "Uploaded file is empty or too small." });
+        }
+
+        console.log(`Audio file saved at: ${file.path}`);
+        console.log(`Audio duration: ${duration} seconds`);
+
+        const inputPath = file.path;
+        const outputPath = inputPath.replace(path.extname(inputPath), ".wav");
+
+        // Convert audio from webm to WAV
+        await new Promise((resolve, reject) => {
+            exec(
+                `ffmpeg -y -i "${inputPath}" "${outputPath}"`,
+                (error, stdout, stderr) => {
+                    if (error) {
+                        console.error("Error converting to WAV:", stderr || error.message);
+                        return reject(error);
+                    }
+                    console.log("Conversion to WAV successful");
+                    resolve();
+                }
+            );
+        });
+
+        try {
+            await fs.unlink(inputPath);
+            console.log("Original uploaded file deleted:", inputPath);
+        } catch (unlinkError) {
+            console.warn("Failed to delete original file:", unlinkError.message);
+        }
+
+        const pythonScriptPath = path.join(
+            process.cwd(),
+            "utilities",
+            "audioOrVideoToText.py"
+        );
+        const pythonExecutable =
+            process.platform === "win32" ? "python" : "python3";
+
+        const python = spawn(pythonExecutable, [pythonScriptPath, outputPath]);
+
+        let transcription = "";
+        let errorOutput = "";
+
+        python.stdout.on("data", (data) => {
+            transcription += data.toString();
+        });
+
+        python.stderr.on("data", (data) => {
+            errorOutput += data.toString();
+        });
+
+        python.on("close", async(code) => {
+            if (code !== 0) {
+                console.error("Transcription failed:", errorOutput);
+                return res
+                    .status(500)
+                    .json({ error: "Transcription failed", details: errorOutput });
+            }
+
+            try {
+                const transcribedText = transcription.trim();
+                console.log("Transcribed Text:", transcribedText);
+
+                const answer = await generateTherapyReply(transcribedText);
+                const responseArray = JSON.parse(answer);
+                const replyTextOnly2 = responseArray
+                    .map((item) => item.text)
+                    .join("\n");
+                console.log(responseArray);
+
+                const messages = [];
+                for (let i = 0; i < responseArray.length; i++) {
+                    const message = await generateAudioAndLipSync(responseArray[i], i);
+                    messages.push(message);
+                }
+
+                const sessionId = req.cookies.activeSessionId;
+                if (!sessionId) {
+                    return res.status(400).json({ error: "No active session selected" });
+                }
+
+                const token = req.cookies.token;
+                const decoded = jwt.verify(token, process.env.JWT_SECRET);
+                const userId = decoded.userId;
+                if (!userId) {
+                    return res
+                        .status(400)
+                        .json({ error: "Invalid token or user ID missing" });
+                }
+
+                const replyTextOnly = messages.map((msg) => msg.text).join(" ");
+                const userMessage = transcribedText;
+
+                const newMsg = await AI_Message.create({
+                    sender_id: userId,
+                    message_text: userMessage,
+                    response: replyTextOnly2,
+                    chat_session_id: sessionId,
+                });
+
+                await TherapySession.findByIdAndUpdate(sessionId, {
+                    $push: { chat_sessions: newMsg._id },
+                });
+
+                const newEmotion = await ExtractedEmotion.create({
+                    session_id: sessionId,
+                    extracted_emotion: "neutral",
+                    uploaded_data_type: "audio",
+                    file_paths: outputPath,
+                });
+
+                await TherapySession.findByIdAndUpdate(sessionId, {
+                    $push: { emotion_records: newEmotion._id },
+                });
+
+                res.send({ messages });
+            } catch (err) {
+                console.error("Error processing transcription:", err);
+                return res
+                    .status(500)
+                    .json({ error: "Failed to process transcription output." });
+            }
+        });
+
+        python.on("error", (error) => {
+            console.error("Failed to start Python process:", error.message);
+            res.status(500).json({
+                error: "Failed to start Python script",
+                details: error.message,
+            });
+        });
+    } catch (error) {
+        console.error("Unexpected error:", error);
+        res
+            .status(500)
+            .json({ error: "Failed to process audio", details: error.message });
+    }
 };
 
 const extractVideoFinalPrediction = (stdout) => {
-  const match = stdout.match(/Final Prediction:\s*(\w+)/);
-  return match ? match[1] : null;
+    const match = stdout.match(/Final Prediction:\s*(\w+)/);
+    return match ? match[1] : null;
 };
 
-const predictEmotionFromVideo = async (videoPath) => {
-  const pythonScriptPath = path.join(
-    process.cwd(),
-    "utilities",
-    "predict_video.py"
-  );
-  const command = `python3 "${pythonScriptPath}" "${videoPath}"`;
-  const output = await execCommand(command);
-  const prediction = extractVideoFinalPrediction(output);
-  console.log("🎯 Final Video Emotion Prediction:", prediction);
-  return prediction;
-};
-
-export const videoReply = async (req, res) => {
-  try {
-    const file = req.file;
-    const duration = req.body.duration;
-
-    if (!file || file.size < 500) {
-      return res
-        .status(400)
-        .json({ error: "Uploaded file is empty or too small." });
-    }
-    if (!["video/webm", "video/mp4"].includes(file.mimetype)) {
-      return res.status(400).json({ error: "Unsupported file type." });
-    }
-
-    console.log(
-      `Uploaded file: ${file.originalname}, size: ${file.size} bytes`
-    );
-    console.log(`Video duration: ${duration} seconds`);
-    const inputPath = file.path;
-    const outputPath = inputPath.replace(path.extname(inputPath), ".mp4");
-
-    // Convert video to MP4
-    await new Promise((resolve, reject) => {
-      const command = `ffmpeg -y -i "${inputPath}" "${outputPath}"`;
-      exec(command, { timeout: 60000 }, (error, stdout, stderr) => {
-        if (error) {
-          console.error("FFmpeg conversion error:", stderr || error.message);
-          return reject(new Error("Failed to convert video."));
-        }
-        console.log("Video converted to MP4 successfully.");
-        resolve();
-      });
-    });
-
-    try {
-      await fs.unlink(inputPath);
-      console.log("Original uploaded file deleted:", inputPath);
-    } catch (unlinkError) {
-      console.warn("Failed to delete original file:", unlinkError.message);
-    }
-
+const predictEmotionFromVideo = async(videoPath) => {
     const pythonScriptPath = path.join(
-      process.cwd(),
-      "utilities",
-      "audioOrVideoToText.py"
+        process.cwd(),
+        "utilities",
+        "predict_video.py"
     );
-    const pythonExecutable =
-      process.platform === "win32" ? "python" : "python3";
+    const command = `python3 "${pythonScriptPath}" "${videoPath}"`;
+    const output = await execCommand(command);
+    const prediction = extractVideoFinalPrediction(output);
+    console.log("🎯 Final Video Emotion Prediction:", prediction);
+    return prediction;
+};
 
-    const pythonProcess = spawn(pythonExecutable, [
-      pythonScriptPath,
-      outputPath,
-    ]);
+export const videoReply = async(req, res) => {
+    try {
+        const file = req.file;
+        const duration = req.body.duration;
 
-    let transcription = "";
-    let errorOutput = "";
-
-    pythonProcess.stdout.on("data", (data) => {
-      transcription += data.toString();
-    });
-
-    pythonProcess.stderr.on("data", (data) => {
-      errorOutput += data.toString();
-    });
-
-    pythonProcess.on("close", async (code) => {
-      // try {
-      //   await fs.unlink(outputPath);
-      //   console.log("Converted MP4 file deleted:", outputPath);
-      // } catch (err) {
-      //   console.warn("Failed to delete converted MP4 file:", err.message);
-      // }
-
-      if (code !== 0) {
-        console.error("Python transcription script error:", errorOutput);
-        return res
-          .status(500)
-          .json({ error: "Transcription failed.", details: errorOutput });
-      }
-
-      try {
-        const transcribedText = transcription.trim();
-        console.log("Transcribed Text:", transcribedText);
-
-        const emotion_extracted = await predictEmotionFromVideo(outputPath);
-        console.log("🎯 Final Emotion Extracted:", emotion_extracted);
-
-        const answer = await generateTherapyReply(transcribedText);
-
-        const responseArray = JSON.parse(answer);
-
-        console.log(responseArray);
-
-        const messages = [];
-
-        for (let i = 0; i < responseArray.length; i++) {
-          const message = await generateAudioAndLipSync(responseArray[i], i);
-          messages.push(message);
+        if (!file || file.size < 500) {
+            return res
+                .status(400)
+                .json({ error: "Uploaded file is empty or too small." });
+        }
+        if (!["video/webm", "video/mp4"].includes(file.mimetype)) {
+            return res.status(400).json({ error: "Unsupported file type." });
         }
 
-        //save data to database
-        const sessionId = req.cookies.activeSessionId;
-        if (!sessionId)
-          return res.status(400).json({ error: "No active session selected" });
+        console.log(
+            `Uploaded file: ${file.originalname}, size: ${file.size} bytes`
+        );
+        console.log(`Video duration: ${duration} seconds`);
+        const inputPath = file.path;
+        const outputPath = inputPath.replace(path.extname(inputPath), ".mp4");
 
-        const token = req.cookies.token;
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const userId = decoded.userId;
-        if (!userId)
-          return res
-            .status(400)
-            .json({ error: "Invalid token or user ID missing" });
-
-        const replyTextOnly = messages.map((msg) => msg.text).join(" "); // Assuming each message has a .text property
-        const userMessage = transcribedText; // This is the actual user message (transcribed from video)
-
-        const newMsg = await AI_Message.create({
-          sender_id: userId,
-          message_text: userMessage,
-          response: replyTextOnly,
-          chat_session_id: sessionId,
+        // Convert video to MP4
+        await new Promise((resolve, reject) => {
+            const command = `ffmpeg -y -i "${inputPath}" "${outputPath}"`;
+            exec(command, { timeout: 60000 }, (error, stdout, stderr) => {
+                if (error) {
+                    console.error("FFmpeg conversion error:", stderr || error.message);
+                    return reject(new Error("Failed to convert video."));
+                }
+                console.log("Video converted to MP4 successfully.");
+                resolve();
+            });
         });
 
-        await TherapySession.findByIdAndUpdate(sessionId, {
-          $push: { chat_sessions: newMsg._id },
+        try {
+            await fs.unlink(inputPath);
+            console.log("Original uploaded file deleted:", inputPath);
+        } catch (unlinkError) {
+            console.warn("Failed to delete original file:", unlinkError.message);
+        }
+
+        const pythonScriptPath = path.join(
+            process.cwd(),
+            "utilities",
+            "audioOrVideoToText.py"
+        );
+        const pythonExecutable =
+            process.platform === "win32" ? "python" : "python3";
+
+        const pythonProcess = spawn(pythonExecutable, [
+            pythonScriptPath,
+            outputPath,
+        ]);
+
+        let transcription = "";
+        let errorOutput = "";
+
+        pythonProcess.stdout.on("data", (data) => {
+            transcription += data.toString();
         });
 
-        const newEmotion = await ExtractedEmotion.create({
-          session_id: sessionId,
-          extracted_emotion: emotion_extracted,
-          uploaded_data_type: "video",
-          file_paths: outputPath,
+        pythonProcess.stderr.on("data", (data) => {
+            errorOutput += data.toString();
         });
 
-        // Update TherapySession to include this emotion
-        await TherapySession.findByIdAndUpdate(sessionId, {
-          $push: { emotion_records: newEmotion._id },
+        pythonProcess.on("close", async(code) => {
+            // try {
+            //   await fs.unlink(outputPath);
+            //   console.log("Converted MP4 file deleted:", outputPath);
+            // } catch (err) {
+            //   console.warn("Failed to delete converted MP4 file:", err.message);
+            // }
+
+            if (code !== 0) {
+                console.error("Python transcription script error:", errorOutput);
+                return res
+                    .status(500)
+                    .json({ error: "Transcription failed.", details: errorOutput });
+            }
+
+            try {
+                const transcribedText = transcription.trim();
+                console.log("Transcribed Text:", transcribedText);
+
+                const emotion_extracted = await predictEmotionFromVideo(outputPath);
+                console.log("🎯 Final Emotion Extracted:", emotion_extracted);
+
+                const answer = await generateTherapyReply(transcribedText);
+
+                const responseArray = JSON.parse(answer);
+
+                console.log(responseArray);
+
+                const messages = [];
+
+                for (let i = 0; i < responseArray.length; i++) {
+                    const message = await generateAudioAndLipSync(responseArray[i], i);
+                    messages.push(message);
+                }
+
+                //save data to database
+                const sessionId = req.cookies.activeSessionId;
+                if (!sessionId)
+                    return res.status(400).json({ error: "No active session selected" });
+
+                const token = req.cookies.token;
+                const decoded = jwt.verify(token, process.env.JWT_SECRET);
+                const userId = decoded.userId;
+                if (!userId)
+                    return res
+                        .status(400)
+                        .json({ error: "Invalid token or user ID missing" });
+
+                const replyTextOnly = messages.map((msg) => msg.text).join(" "); // Assuming each message has a .text property
+                const userMessage = transcribedText; // This is the actual user message (transcribed from video)
+
+                const newMsg = await AI_Message.create({
+                    sender_id: userId,
+                    message_text: userMessage,
+                    response: replyTextOnly,
+                    chat_session_id: sessionId,
+                });
+
+                await TherapySession.findByIdAndUpdate(sessionId, {
+                    $push: { chat_sessions: newMsg._id },
+                });
+
+                const newEmotion = await ExtractedEmotion.create({
+                    session_id: sessionId,
+                    extracted_emotion: emotion_extracted,
+                    uploaded_data_type: "video",
+                    file_paths: outputPath,
+                });
+
+                // Update TherapySession to include this emotion
+                await TherapySession.findByIdAndUpdate(sessionId, {
+                    $push: { emotion_records: newEmotion._id },
+                });
+
+                res.send({ messages });
+            } catch (err) {
+                console.error("Error processing transcription:", err);
+                return res
+                    .status(500)
+                    .json({ error: "Failed to process transcription output." });
+            }
         });
 
-        res.send({ messages });
-      } catch (err) {
-        console.error("Error processing transcription:", err);
+        pythonProcess.on("error", (err) => {
+            console.error("Failed to start Python process:", err.message);
+            return res.status(500).json({
+                error: "Failed to start transcription process.",
+                details: err.message,
+            });
+        });
+    } catch (error) {
+        console.error("Unexpected server error:", error);
         return res
-          .status(500)
-          .json({ error: "Failed to process transcription output." });
-      }
-    });
-
-    pythonProcess.on("error", (err) => {
-      console.error("Failed to start Python process:", err.message);
-      return res.status(500).json({
-        error: "Failed to start transcription process.",
-        details: err.message,
-      });
-    });
-  } catch (error) {
-    console.error("Unexpected server error:", error);
-    return res
-      .status(500)
-      .json({ error: "Internal server error.", details: error.message });
-  }
+            .status(500)
+            .json({ error: "Internal server error.", details: error.message });
+    }
 };
