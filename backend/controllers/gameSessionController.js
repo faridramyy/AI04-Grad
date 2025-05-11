@@ -28,12 +28,15 @@ export const generateScenario = async (req, res) => {
       chosen_option,
       stress_score,
     });
+
     const escapedJson = inputJson.replace(/"/g, '\\"');
 
-    const scriptPath = path.join(process.cwd(), "utilities", "game.py");
+    const scriptPath = path.join(process.cwd(), "utilities", "gamni.py");
     const command = `python3 "${scriptPath}" "${escapedJson}"`;
 
-    const output = await execCommand(command);
+      const output = await execCommand(command);
+
+      console.log("📦 Python Output (raw):", output);
 
     let parsed;
     try {

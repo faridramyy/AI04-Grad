@@ -13,6 +13,7 @@ export function GameModal({ onClose }) {
   const [finished, setFinished] = useState(false);
   const [history, setHistory] = useState([]);
   const [summary, setSummary] = useState(null);
+  const [error, setError] = useState(null); // New: error state
 
   useEffect(() => {
     setInitialStressScore(stressScore);
@@ -25,6 +26,7 @@ export function GameModal({ onClose }) {
     score = stressScore
   ) => {
     setIsLoading(true);
+    setError(null); // Clear previous error
     try {
       const res = await fetch(`${BACKEND_URL}/api/game-sessions/generate`, {
         method: "POST",
@@ -47,20 +49,24 @@ export function GameModal({ onClose }) {
         }),
       });
 
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || "Failed to fetch scenario");
+      }
+
       const data = await res.json();
       setSelectedOptionIndex(null);
       setCurrentScenario(data);
     } catch (err) {
-      console.error("❌ Error loading scenario:", err);
+      console.error("❌ Error loading scenario:", err.message);
+      setError(err.message);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleSelectOption = (index) => {
-    if (!isLoading) {
-      setSelectedOptionIndex(index);
-    }
+    if (!isLoading) setSelectedOptionIndex(index);
   };
 
   const handleNext = () => {
@@ -76,9 +82,11 @@ export function GameModal({ onClose }) {
         choices: currentScenario.responses.map((r) => r.option),
         answer_index: currentScenario.best_choice_index ?? 0,
         selectedOption: selected.option,
+        stressAfter: updatedStress,
         difficulty: currentScenario.difficulty || "medium",
       },
     ]);
+
     setStressScore(updatedStress);
     fetchScenario(currentScenario, selected.option, updatedStress);
   };
@@ -128,6 +136,12 @@ export function GameModal({ onClose }) {
           <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
             <X size={20} />
           </button>
+
+          {error && (
+            <div className="mb-4 p-3 rounded-md bg-red-500/10 border border-red-500 text-red-300 text-sm">
+              ⚠️ {error}
+            </div>
+          )}
 
           {!finished ? (
             currentScenario ? (
