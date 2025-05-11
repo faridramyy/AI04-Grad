@@ -8,6 +8,7 @@ import {
   updateUser,
   deleteUser,
   signinUser,
+  verifyToken,
 } from "../controllers/userController.js";
 
 const router = express.Router();
@@ -15,6 +16,7 @@ const router = express.Router();
 // 👇 All routes are prefixed with /api/users in index.js
 router.post("/signin", authMiddleware("none"), signinUser);
 router.post("/signup", authMiddleware("none"), createUser);
+router.get('/verify_token',verifyToken)
 router.post("/logout", logoutUser);
 
 

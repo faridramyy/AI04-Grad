@@ -76,6 +76,20 @@ export default function FloatingHistoryPanel() {
     }
   };
 
+  const selectSession = async (sessionId) => {
+    try {
+      const res = await axios.get(
+        `${BACKEND_URL}/api/therapy-sessions/select_session/${sessionId}`,
+        { withCredentials: true }
+      );
+      toast.success(`Session ${sessionId} selected`);
+      console.log("Selected session data:", res.data);
+    } catch (error) {
+      toast.error("Failed to select session");
+      console.error("Select session error:", error);
+    }
+  };
+
   return (
     <>
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
@@ -120,6 +134,7 @@ export default function FloatingHistoryPanel() {
             {historyData.map((item) => (
               <div
                 key={item.id}
+                onClick={() => selectSession(item.id)}
                 className="mb-3 p-3 bg-gray-800/50 rounded-md hover:bg-gray-700/50 cursor-pointer border border-white/5"
               >
                 <div className="text-sm text-gray-400">{item.date}</div>
