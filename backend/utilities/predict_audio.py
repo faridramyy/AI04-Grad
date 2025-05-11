@@ -38,30 +38,33 @@ def load_all_models(data_type):
     return models
 
 def preprocess_audio(y, sr, model_name):
-    if model_name == "cnn_CREMA_D":
-        # Create a 768-length feature vector (match model expectation)
-        mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=24)  # (24, time)
-        mfcc = librosa.util.fix_length(mfcc, size=32, axis=1)  # Ensure (24, 32)
-        flattened = mfcc.flatten()  # → (768,)
-        return np.expand_dims(flattened, axis=0)  # → (1, 768)
+    try:
+        if model_name == "cnn_CREMA_D":
+            mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=24)  # shape: (24, time)
+            mfcc = librosa.util.fix_length(mfcc, size=32, axis=1)  # shape: (24, 32)
+            flattened = mfcc.T.flatten()  # (32, 24) → (768,)
+            return np.expand_dims(flattened, axis=0)  # → (1, 768)
 
-    elif model_name == "cnn":
-        mel = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=24)
-        log_mel = librosa.power_to_db(mel, ref=np.max)
-        log_mel = librosa.util.fix_length(log_mel, size=32, axis=1)
-        log_mel = (log_mel - np.min(log_mel)) / (np.max(log_mel) - np.min(log_mel))
-        return np.expand_dims(log_mel.flatten(), axis=0)
+        elif model_name == "cnn":
+            mel = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=24)
+            log_mel = librosa.power_to_db(mel, ref=np.max)
+            log_mel = librosa.util.fix_length(log_mel, size=32, axis=1)
+            log_mel = (log_mel - np.min(log_mel)) / (np.max(log_mel) - np.min(log_mel))
+            return np.expand_dims(log_mel.flatten(), axis=0)
 
-    elif model_name == "lstm_CREMA_D":
-        mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13)
-        return np.expand_dims(mfcc.T, axis=0)
+        elif model_name == "lstm_CREMA_D":
+            mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13)
+            mfcc = librosa.util.fix_length(mfcc, size=130, axis=1)
+            return np.expand_dims(mfcc.T, axis=0)
 
-    elif model_name == "lstm":
-        mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=1)
-        return np.expand_dims(mfcc.T, axis=0)
+        elif model_name == "lstm":
+            mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=1)
+            mfcc = librosa.util.fix_length(mfcc, size=130, axis=1)
+            return np.expand_dims(mfcc.T, axis=0)
 
-    return None
-
+    except Exception as e:
+        print(f"❌ Preprocessing failed for {model_name}: {e}")
+        return None
 
 def main():
     if len(sys.argv) < 2:
