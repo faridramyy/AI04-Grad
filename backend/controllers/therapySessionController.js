@@ -329,6 +329,8 @@ export const dashboardStressAnalysis = async(req, res) => {
     }
 };
 
+
+
 export const allSessionsStressAnalysis = async(req, res) => {
     try {
         // 1) Auth
@@ -344,18 +346,25 @@ export const allSessionsStressAnalysis = async(req, res) => {
                 select: "stress_score_before stress_score_after",
             });
 
-        // 3) Build one flat array of all stress values:
-        //    [ sess1.before, gs1.before, gs1.after, gs2.before, gs2.after, …,
-        //      sess2.before, gs1.before, gs1.after, …, sess3.before, … ]
-        const allValues = sessions.flatMap(sess => [
-            sess.stress_score_before,
-            ...sess.game_sessions.flatMap(g => [
-                g.stress_score_before,
-                g.stress_score_after,
-            ]),
-        ]);
+        // 3) Build flat rows: one object per measurement
+        const rows = sessions.flatMap((sess, idx) => {
+            const sessionName = `Session ${idx + 1}`;
+            const endDate = sess.end_time;
 
-        return res.json({ values: allValues });
+            // start with the session’s initial stress
+            const measurements = [
+                { sessionName, endDate, value: sess.stress_score_before },
+                // then each game’s before/after
+                ...sess.game_sessions.flatMap(g => [
+                    { sessionName, endDate, value: g.stress_score_before },
+                    { sessionName, endDate, value: g.stress_score_after },
+                ]),
+            ];
+
+            return measurements;
+        });
+
+        return res.json({ rows });
     } catch (err) {
         return res.status(500).json({ error: err.message });
     }
@@ -394,7 +403,6 @@ export const dashboardFinalScoreAnalysis = async(req, res) => {
 
 
 
-
 export const allSessionsFinalScoreAnalysis = async(req, res) => {
     try {
         // 1) Auth
@@ -402,24 +410,32 @@ export const allSessionsFinalScoreAnalysis = async(req, res) => {
         if (!token) return res.status(401).json({ error: "Unauthorized." });
         const { userId } = jwt.verify(token, process.env.JWT_SECRET);
 
-        // 2) Load all sessions for this user, with only final_score from game_sessions
+        // 2) Load all sessions, with only final_score & difficulty_level from game_sessions
         const sessions = await TherapySession.find({ patient_id: userId })
             .sort({ start_time: 1 })
             .populate({
                 path: "game_sessions",
-                select: "final_score",
+                select: "final_score difficulty_level",
             });
 
-        // 3) Flatten all final_scores into one array
-        const allValues = sessions.flatMap(sess =>
-            sess.game_sessions.map(g => g.final_score)
-        );
+        // 3) Build flat rows
+        const rows = sessions.flatMap((sess, idx) => {
+            const sessionName = `Session ${idx + 1}`;
+            return sess.game_sessions.map(g => ({
+                sessionName,
+                difficulty: g.difficulty_level,
+                score: g.final_score,
+            }));
+        });
 
-        return res.json({ values: allValues });
+        return res.json({ rows });
     } catch (err) {
         return res.status(500).json({ error: err.message });
     }
 };
+
+
+
 export const getSessionEmotionDistribution = async(req, res) => {
     try {
         // 1) Auth
@@ -462,24 +478,37 @@ export const getAllSessionsEmotionDistribution = async(req, res) => {
         if (!token) return res.status(401).json({ error: "Unauthorized." });
         const { userId } = jwt.verify(token, process.env.JWT_SECRET);
 
-        // 2) Load all sessions + their emotion_records.emotion
+        // 2) Load all sessions + only the 'extracted_emotion' field
         const sessions = await TherapySession.find({ patient_id: userId })
+            .sort({ start_time: 1 })
             .populate({
                 path: "emotion_records",
                 select: "extracted_emotion",
             });
-        console.log(sessions);
 
-        // 3) Flatten & count
-        const counts = {};
-        for (const sess of sessions) {
-            for (const rec of sess.emotion_records) {
+        // 3) Aggregate across sessions
+        const agg = {}; // { emotion: { count: number, sessions: Set<string> } }
+
+        sessions.forEach((sess, idx) => {
+            const sessionKey = `session${idx + 1}`; // "session1", etc.
+            sess.emotion_records.forEach((rec) => {
                 const em = rec.extracted_emotion;
-                counts[em] = (counts[em] || 0) + 1;
-            }
-        }
+                if (!agg[em]) {
+                    agg[em] = { count: 0, sessions: new Set() };
+                }
+                agg[em].count += 1;
+                agg[em].sessions.add(sessionKey);
+            });
+        });
 
-        return res.json({ counts });
+        // 4) Build rows
+        const rows = Object.entries(agg).map(([emotion, { count, sessions }]) => ({
+            emotion,
+            count,
+            session: Array.from(sessions).join(","),
+        }));
+
+        return res.json({ rows });
     } catch (err) {
         return res.status(500).json({ error: err.message });
     }
