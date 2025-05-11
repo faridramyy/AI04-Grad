@@ -221,6 +221,7 @@ export const deleteTherapySession = async(req, res) => {
 
 export const selectSession = async(req, res) => {
     try {
+        console.log("i am here in selected session ");
         const sessionId = req.params.id;
         const token = req.cookies.token;
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -241,6 +242,7 @@ export const selectSession = async(req, res) => {
 
         // ─── UPDATE end_time ─────────────────────────────────────────────
         session.end_time = new Date();
+        const stress_score_before = session.stress_score_before;
         await session.save();
         // ─────────────────────────────────────────────────────────────────
 
@@ -250,10 +252,17 @@ export const selectSession = async(req, res) => {
             sameSite: "Lax",
             maxAge: 24 * 60 * 60 * 1000,
         });
+        res.cookie("initial_stress_score", stress_score_before, {
+            httpOnly: true,
+            sameSite: "Lax",
+            maxAge: 24 * 60 * 60 * 1000,
+        });
+        console.log(" i am in select session and the stress score before is :", stress_score_before);
 
         // Return the updated session
         res.status(200).json({
             message: "Session selected and end_time updated.",
+            initialstressscore: stress_score_before,
             session,
         });
 
