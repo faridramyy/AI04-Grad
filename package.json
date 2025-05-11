@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "express": "^5.1.0",
+    "open": "^10.1.2",
+    "ytmusic-api": "^5.3.0"
+  }
+}
