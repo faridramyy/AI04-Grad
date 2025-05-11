@@ -248,12 +248,12 @@ export const selectSession = async(req, res) => {
 
         // Store in cookie
         res.cookie("activeSessionId", sessionId, {
-            httpOnly: true,
+            httpOnly: false,
             sameSite: "Lax",
             maxAge: 24 * 60 * 60 * 1000,
         });
         res.cookie("initial_stress_score", stress_score_before, {
-            httpOnly: true,
+            httpOnly: false,
             sameSite: "Lax",
             maxAge: 24 * 60 * 60 * 1000,
         });
