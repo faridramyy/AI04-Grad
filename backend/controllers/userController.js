@@ -51,24 +51,35 @@ export const signinUser = async (req, res) => {
       res.cookie("activeSessionId", recentSession._id.toString(), cookieOpts);
     }
 
-        // 6. Send response
-        return res.status(200).json({
-            message: "Signed in successfully",
-            token,
-            user: {
-                id: user._id,
-                role: user.role,
-                username: user.username,
-            },
-            activeSessionId: recentSession ?
-                recentSession._id :
-                null,
+    // 6. Send response
+    return res.status(200).json({
+      message: "Signed in successfully",
+      token,
+      user: {
+        id: user._id,
+        role: user.role,
+        username: user.username,
+      },
+      activeSessionId: recentSession ? recentSession._id : null,
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
 
-        });
+// in your auth route file
 
-    } catch (err) {
-        return res.status(500).json({ error: err.message });
-    }
+export const verifyToken = async (req, res) => {
+  const token = req.cookies.token;
+
+  if (!token) return res.status(401).json({ isAuthenticated: false });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    return res.status(200).json({ isAuthenticated: true, user: decoded });
+  } catch (err) {
+    return res.status(401).json({ isAuthenticated: false });
+  }
 };
 
 // /**
@@ -168,7 +179,6 @@ export const createUser = async (req, res) => {
   }
 };
 
-
 export const logoutUser = (req, res) => {
   res.clearCookie("token", {
     httpOnly: true,
@@ -184,8 +194,6 @@ export const logoutUser = (req, res) => {
 
   return res.status(200).json({ message: "Logged out successfully" });
 };
-
-
 
 // /**
 //  * @route   GET /api/users
