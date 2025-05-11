@@ -329,6 +329,8 @@ export const dashboardStressAnalysis = async(req, res) => {
     }
 };
 
+
+
 export const allSessionsStressAnalysis = async(req, res) => {
     try {
         // 1) Auth
@@ -344,18 +346,25 @@ export const allSessionsStressAnalysis = async(req, res) => {
                 select: "stress_score_before stress_score_after",
             });
 
-        // 3) Build one flat array of all stress values:
-        //    [ sess1.before, gs1.before, gs1.after, gs2.before, gs2.after, …,
-        //      sess2.before, gs1.before, gs1.after, …, sess3.before, … ]
-        const allValues = sessions.flatMap(sess => [
-            sess.stress_score_before,
-            ...sess.game_sessions.flatMap(g => [
-                g.stress_score_before,
-                g.stress_score_after,
-            ]),
-        ]);
+        // 3) Build flat rows: one object per measurement
+        const rows = sessions.flatMap((sess, idx) => {
+            const sessionName = `Session ${idx + 1}`;
+            const endDate = sess.end_time;
 
-        return res.json({ values: allValues });
+            // start with the session’s initial stress
+            const measurements = [
+                { sessionName, endDate, value: sess.stress_score_before },
+                // then each game’s before/after
+                ...sess.game_sessions.flatMap(g => [
+                    { sessionName, endDate, value: g.stress_score_before },
+                    { sessionName, endDate, value: g.stress_score_after },
+                ]),
+            ];
+
+            return measurements;
+        });
+
+        return res.json({ rows });
     } catch (err) {
         return res.status(500).json({ error: err.message });
     }
