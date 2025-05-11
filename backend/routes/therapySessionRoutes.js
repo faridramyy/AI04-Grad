@@ -12,7 +12,9 @@ import {
     dashboardStressAnalysis,
     allSessionsStressAnalysis,
     dashboardFinalScoreAnalysis,
-    allSessionsFinalScoreAnalysis
+    allSessionsFinalScoreAnalysis,
+    getSessionEmotionDistribution,
+    getAllSessionsEmotionDistribution
 
 } from "../controllers/therapySessionController.js";
 
@@ -32,7 +34,8 @@ router.get("/:sessionId/stress-chart", dashboardStressAnalysis);
 router.get("/stress-chart/all", allSessionsStressAnalysis);
 router.get("/:sessionId/final-score-chart", dashboardFinalScoreAnalysis);
 router.get("/final-score-chart/all", allSessionsFinalScoreAnalysis);
-
+router.get("/:sessionId/emotion-distribution", getSessionEmotionDistribution);
+router.get("/emotion-distribution/all", getAllSessionsEmotionDistribution);
 
 
 export default router;

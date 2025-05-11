@@ -411,3 +411,67 @@ export const allSessionsFinalScoreAnalysis = async(req, res) => {
         return res.status(500).json({ error: err.message });
     }
 };
+export const getSessionEmotionDistribution = async(req, res) => {
+    try {
+        // 1) Auth
+        const token = req.cookies.token;
+        if (!token) return res.status(401).json({ error: "Unauthorized." });
+        const { userId } = jwt.verify(token, process.env.JWT_SECRET);
+
+        // 2) Load session + only 'emotion' from each record
+        const session = await TherapySession.findById(req.params.sessionId)
+            .populate({
+                path: "emotion_records",
+                select: "extracted_emotion",
+            });
+        if (!session) return res.status(404).json({ error: "Session not found." });
+        if (session.patient_id.toString() !== userId) {
+            return res.status(403).json({ error: "Forbidden." });
+        }
+        console.log(session);
+
+        // 3) Count each unique emotion
+        const counts = {};
+        for (const rec of session.emotion_records) {
+            const em = rec.extracted_emotion;
+            counts[em] = (counts[em] || 0) + 1;
+        }
+
+        return res.json({ counts });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+};
+
+
+
+
+export const getAllSessionsEmotionDistribution = async(req, res) => {
+    try {
+        // 1) Auth
+        const token = req.cookies.token;
+        if (!token) return res.status(401).json({ error: "Unauthorized." });
+        const { userId } = jwt.verify(token, process.env.JWT_SECRET);
+
+        // 2) Load all sessions + their emotion_records.emotion
+        const sessions = await TherapySession.find({ patient_id: userId })
+            .populate({
+                path: "emotion_records",
+                select: "extracted_emotion",
+            });
+        console.log(sessions);
+
+        // 3) Flatten & count
+        const counts = {};
+        for (const sess of sessions) {
+            for (const rec of sess.emotion_records) {
+                const em = rec.extracted_emotion;
+                counts[em] = (counts[em] || 0) + 1;
+            }
+        }
+
+        return res.json({ counts });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+};
