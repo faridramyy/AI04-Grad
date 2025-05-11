@@ -221,6 +221,7 @@ export const deleteTherapySession = async(req, res) => {
 
 export const selectSession = async(req, res) => {
     try {
+        console.log("i am here in selected session ");
         const sessionId = req.params.id;
         const token = req.cookies.token;
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -241,6 +242,7 @@ export const selectSession = async(req, res) => {
 
         // ─── UPDATE end_time ─────────────────────────────────────────────
         session.end_time = new Date();
+        const stress_score_before = session.stress_score_before;
         await session.save();
         // ─────────────────────────────────────────────────────────────────
 
@@ -250,10 +252,17 @@ export const selectSession = async(req, res) => {
             sameSite: "Lax",
             maxAge: 24 * 60 * 60 * 1000,
         });
+        res.cookie("initial_stress_score", stress_score_before, {
+            httpOnly: true,
+            sameSite: "Lax",
+            maxAge: 24 * 60 * 60 * 1000,
+        });
+        console.log(" i am in select session and the stress score before is :", stress_score_before);
 
         // Return the updated session
         res.status(200).json({
             message: "Session selected and end_time updated.",
+            initialstressscore: stress_score_before,
             session,
         });
 
@@ -407,6 +416,70 @@ export const allSessionsFinalScoreAnalysis = async(req, res) => {
         );
 
         return res.json({ values: allValues });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+};
+export const getSessionEmotionDistribution = async(req, res) => {
+    try {
+        // 1) Auth
+        const token = req.cookies.token;
+        if (!token) return res.status(401).json({ error: "Unauthorized." });
+        const { userId } = jwt.verify(token, process.env.JWT_SECRET);
+
+        // 2) Load session + only 'emotion' from each record
+        const session = await TherapySession.findById(req.params.sessionId)
+            .populate({
+                path: "emotion_records",
+                select: "extracted_emotion",
+            });
+        if (!session) return res.status(404).json({ error: "Session not found." });
+        if (session.patient_id.toString() !== userId) {
+            return res.status(403).json({ error: "Forbidden." });
+        }
+        console.log(session);
+
+        // 3) Count each unique emotion
+        const counts = {};
+        for (const rec of session.emotion_records) {
+            const em = rec.extracted_emotion;
+            counts[em] = (counts[em] || 0) + 1;
+        }
+
+        return res.json({ counts });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+};
+
+
+
+
+export const getAllSessionsEmotionDistribution = async(req, res) => {
+    try {
+        // 1) Auth
+        const token = req.cookies.token;
+        if (!token) return res.status(401).json({ error: "Unauthorized." });
+        const { userId } = jwt.verify(token, process.env.JWT_SECRET);
+
+        // 2) Load all sessions + their emotion_records.emotion
+        const sessions = await TherapySession.find({ patient_id: userId })
+            .populate({
+                path: "emotion_records",
+                select: "extracted_emotion",
+            });
+        console.log(sessions);
+
+        // 3) Flatten & count
+        const counts = {};
+        for (const sess of sessions) {
+            for (const rec of sess.emotion_records) {
+                const em = rec.extracted_emotion;
+                counts[em] = (counts[em] || 0) + 1;
+            }
+        }
+
+        return res.json({ counts });
     } catch (err) {
         return res.status(500).json({ error: err.message });
     }
