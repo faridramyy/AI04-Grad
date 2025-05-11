@@ -104,12 +104,14 @@ export const createGameSession = async (req, res) => {
     }
 
     // ─── 2. Validate payload ─────────────────────────────────────────
-    const { scenarios, user_answers, stress_score_before } = req.body;
+    const { scenarios, user_answers} = req.body;
     if (!Array.isArray(scenarios) || scenarios.length === 0) {
       return res
         .status(400)
         .json({ error: "scenarios must be a non-empty array." });
     }
+    const stress_score_before = parseFloat(req.cookies.initial_stress_score);
+    console.log("stress_score_before", stress_score_before);
     if (
       !Array.isArray(user_answers) ||
       user_answers.length !== scenarios.length

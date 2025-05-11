@@ -37,7 +37,7 @@ export const signinUser = async(req, res) => {
 
         // 5. Set cookies: token + (if exists) activeSessionId
         const cookieOpts = {
-            httpOnly: true,
+            httpOnly: false,
             secure: process.env.NODE_ENV === "production",
             sameSite: "Lax",
             maxAge: 24 * 60 * 60 * 1000, // 1 day
