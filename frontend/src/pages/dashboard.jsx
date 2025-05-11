@@ -211,7 +211,7 @@ export default function Dashboard() {
 
   // Get the selected session name for display
   const getSessionName = () => {
-    if (selectedSession === "all") return "All Sessions"
+    if (selectedSession === "all") return "All Sessions "
     const session = mockSessions.find((s) => s.id === selectedSession)
     return session ? session.name : "Select Session"
   }
