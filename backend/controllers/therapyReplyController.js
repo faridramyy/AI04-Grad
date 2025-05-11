@@ -214,7 +214,7 @@ export const textReply = async(req, res) => {
         const userId = decoded.userId;
         if (!userId) return res.status(400).json({ error: "No active session selected" });
 
-        const { message_text } = req.body;
+        const { message_text } = req.body.message;
         if (!message_text) {
             return res.status(400).json({ error: "cant send empty message" });
         }

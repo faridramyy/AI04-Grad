@@ -286,3 +286,68 @@ export const getAllSessionsOfUser = async(req, res) => {
         return res.status(500).json({ error: error.message });
     }
 };
+
+export const dashboardStressAnalysis = async(req, res) => {
+    try {
+        // 1) Auth
+        const token = req.cookies.token;
+        if (!token) return res.status(401).json({ error: "Unauthorized." });
+        const { userId } = jwt.verify(token, process.env.JWT_SECRET);
+
+        // 2) Load session + its game_sessions (only stress fields)
+        const session = await TherapySession.findById(req.params.sessionId)
+            .populate({
+                path: "game_sessions",
+                select: "stress_score_before stress_score_after",
+            });
+        if (!session) return res.status(404).json({ error: "Session not found." });
+        if (session.patient_id.toString() !== userId) {
+            return res.status(403).json({ error: "Forbidden." });
+        }
+
+        // 3) Build the flat array
+        const values = [
+            session.stress_score_before,
+            ...session.game_sessions.flatMap(g => [
+                g.stress_score_before,
+                g.stress_score_after,
+            ]),
+        ];
+
+        return res.json({ values });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+};
+
+export const allSessionsStressAnalysis = async(req, res) => {
+    try {
+        // 1) Auth
+        const token = req.cookies.token;
+        if (!token) return res.status(401).json({ error: "Unauthorized." });
+        const { userId } = jwt.verify(token, process.env.JWT_SECRET);
+
+        // 2) Load all sessions for this user, sorted by start_time
+        const sessions = await TherapySession.find({ patient_id: userId })
+            .sort({ start_time: 1 })
+            .populate({
+                path: "game_sessions",
+                select: "stress_score_before stress_score_after",
+            });
+
+        // 3) Build one flat array of all stress values:
+        //    [ sess1.before, gs1.before, gs1.after, gs2.before, gs2.after, …,
+        //      sess2.before, gs1.before, gs1.after, …, sess3.before, … ]
+        const allValues = sessions.flatMap(sess => [
+            sess.stress_score_before,
+            ...sess.game_sessions.flatMap(g => [
+                g.stress_score_before,
+                g.stress_score_after,
+            ]),
+        ]);
+
+        return res.json({ values: allValues });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+};

@@ -9,6 +9,8 @@ import {
     deleteTherapySession,
     selectSession,
     getAllSessionsOfUser,
+    dashboardStressAnalysis,
+    allSessionsStressAnalysis
 
 } from "../controllers/therapySessionController.js";
 
@@ -24,7 +26,8 @@ router.get("/:id", authMiddleware("logged"), getTherapySessionById);
 router.post("/", authMiddleware("logged"), createTherapySession);
 router.put("/:id", authMiddleware("logged"), updateTherapySession);
 router.delete("/:id", authMiddleware("logged"), deleteTherapySession);
-
+router.get("/:sessionId/stress-chart", dashboardStressAnalysis);
+router.get("/stress-chart/all", allSessionsStressAnalysis);
 
 
 export default router;
