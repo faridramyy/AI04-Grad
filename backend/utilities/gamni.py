@@ -145,7 +145,7 @@ class ScenarioBank:
 class GeminiScenarioGenerator:
     def __init__(self):
         try:
-            self.model = genai.GenerativeModel('gemini-1.0-pro')
+            self.model = genai.GenerativeModel('gemini-1.5-flash')  
             self.generation_config = {
                 "temperature": 0.8,
                 "top_p": 0.95,
