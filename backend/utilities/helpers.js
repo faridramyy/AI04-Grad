@@ -1,7 +1,7 @@
 import { EMOTION_MAPPING } from './emotionConfig.js';
-import ytmusicInit from 'ytmusic-api';
+import ytmusic from "ytmusic-api"; // Or { YTMusic } if it's named
 
-const YTMusic = ytmusicInit.default;
+const YTMusic = ytmusic; // Remove ytmusicInit reference
 const ytmusicClient = new YTMusic();
 await ytmusicClient.initialize();
 
