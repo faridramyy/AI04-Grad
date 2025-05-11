@@ -5,6 +5,9 @@ import { exec, spawn } from "child_process";
 import path from "path";
 import secrets from "../config/secrets.js";
 import jwt from "jsonwebtoken";
+import AI_Message from "../models/ai_messages.js";
+import TherapySession from "../models/therapy_session.js";
+import ExtractedEmotion from "../models/extracted_emotions.js";
 
 const genAI = new GoogleGenerativeAI(secrets.GOOGLE_API_KEY);
 const elevenLabsApiKey = secrets.ELEVEN_LABS_API_KEY;
@@ -190,33 +193,33 @@ export const textReply = async(req, res) => {
         console.log("🎯 Final Emotion Extracted:", emotion_extracted);
 
         const answer = await generateTherapyReply(userMessage);
-
         const responseArray = JSON.parse(answer);
 
-        console.log(responseArray);
-        // extract & combine just the text bits:
-        const replyTextOnly = responseArray
-            .map(item => item.text)
-            .join("\n")
+        const replyTextOnly = responseArray.map((item) => item.text).join("\n");
 
         const messages = [];
-
-
         for (let i = 0; i < responseArray.length; i++) {
             const message = await generateAudioAndLipSync(responseArray[i], i);
             messages.push(message);
         }
 
-        //save data to database
+        // Save data to database
         const sessionId = req.cookies.activeSessionId;
-        if (!sessionId) return res.status(400).json({ error: "No active session selected" });
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const userId = decoded.userId;
-        if (!userId) return res.status(400).json({ error: "No active session selected" });
+        if (!sessionId) {
+            return res.status(400).json({ error: "No active session selected" });
+        }
 
-        const { message_text } = req.body.message;
-        if (!message_text) {
-            return res.status(400).json({ error: "cant send empty message" });
+        const token = req.cookies.token;
+        let decoded;
+        try {
+            decoded = jwt.verify(token, process.env.JWT_SECRET);
+        } catch (err) {
+            return res.status(401).json({ error: "Invalid or expired token" });
+        }
+
+        const userId = decoded ? .userId;
+        if (!userId) {
+            return res.status(400).json({ error: "No active session selected" });
         }
 
         const newMsg = await AI_Message.create({
@@ -229,26 +232,25 @@ export const textReply = async(req, res) => {
         await TherapySession.findByIdAndUpdate(sessionId, {
             $push: { chat_sessions: newMsg._id },
         });
+
         const newEmotion = await ExtractedEmotion.create({
             session_id: sessionId,
             extracted_emotion: emotion_extracted,
-            uploaded_data_type: "string",
+            uploaded_data_type: "text",
             file_paths: "none",
         });
 
-        // Update TherapySession to include this emotion
         await TherapySession.findByIdAndUpdate(sessionId, {
             $push: { emotion_records: newEmotion._id },
         });
 
-
-
         res.send({ messages });
     } catch (error) {
         console.error("Error:", error);
-        res
-            .status(500)
-            .send({ messages: [], error: "Failed to get response from Gemini" });
+        res.status(500).send({
+            messages: [],
+            error: "Failed to get response from Gemini",
+        });
     }
 };
 
@@ -313,13 +315,6 @@ export const audioReply = async(req, res) => {
         });
 
         python.on("close", async(code) => {
-            // try {
-            //   await fs.unlink(outputPath);
-            //   console.log("WAV file deleted:", outputPath);
-            // } catch (unlinkError) {
-            //   console.warn("Failed to delete WAV file:", unlinkError.message);
-            // }
-
             if (code !== 0) {
                 console.error("Transcription failed:", errorOutput);
                 return res
@@ -332,27 +327,63 @@ export const audioReply = async(req, res) => {
                 console.log("Transcribed Text:", transcribedText);
 
                 const answer = await generateTherapyReply(transcribedText);
-
                 const responseArray = JSON.parse(answer);
-
+                const replyTextOnly2 = responseArray
+                    .map((item) => item.text)
+                    .join("\n");
                 console.log(responseArray);
 
                 const messages = [];
-
                 for (let i = 0; i < responseArray.length; i++) {
                     const message = await generateAudioAndLipSync(responseArray[i], i);
                     messages.push(message);
                 }
 
-                //save data to database
+                const sessionId = req.cookies.activeSessionId;
+                if (!sessionId) {
+                    return res.status(400).json({ error: "No active session selected" });
+                }
+
+                const token = req.cookies.token;
+                const decoded = jwt.verify(token, process.env.JWT_SECRET);
+                const userId = decoded.userId;
+                if (!userId) {
+                    return res
+                        .status(400)
+                        .json({ error: "Invalid token or user ID missing" });
+                }
+
+                const replyTextOnly = messages.map((msg) => msg.text).join(" ");
+                const userMessage = transcribedText;
+
+                const newMsg = await AI_Message.create({
+                    sender_id: userId,
+                    message_text: userMessage,
+                    response: replyTextOnly2,
+                    chat_session_id: sessionId,
+                });
+
+                await TherapySession.findByIdAndUpdate(sessionId, {
+                    $push: { chat_sessions: newMsg._id },
+                });
+
+                const newEmotion = await ExtractedEmotion.create({
+                    session_id: sessionId,
+                    extracted_emotion: "neutral",
+                    uploaded_data_type: "audio",
+                    file_paths: outputPath,
+                });
+
+                await TherapySession.findByIdAndUpdate(sessionId, {
+                    $push: { emotion_records: newEmotion._id },
+                });
 
                 res.send({ messages });
-            } catch (error) {
-                console.error("Error after transcription:", error);
-                res.status(500).send({
-                    messages: [],
-                    error: "Failed to process transcription response",
-                });
+            } catch (err) {
+                console.error("Error processing transcription:", err);
+                return res
+                    .status(500)
+                    .json({ error: "Failed to process transcription output." });
             }
         });
 
@@ -490,6 +521,43 @@ export const videoReply = async(req, res) => {
                 }
 
                 //save data to database
+                const sessionId = req.cookies.activeSessionId;
+                if (!sessionId)
+                    return res.status(400).json({ error: "No active session selected" });
+
+                const token = req.cookies.token;
+                const decoded = jwt.verify(token, process.env.JWT_SECRET);
+                const userId = decoded.userId;
+                if (!userId)
+                    return res
+                        .status(400)
+                        .json({ error: "Invalid token or user ID missing" });
+
+                const replyTextOnly = messages.map((msg) => msg.text).join(" "); // Assuming each message has a .text property
+                const userMessage = transcribedText; // This is the actual user message (transcribed from video)
+
+                const newMsg = await AI_Message.create({
+                    sender_id: userId,
+                    message_text: userMessage,
+                    response: replyTextOnly,
+                    chat_session_id: sessionId,
+                });
+
+                await TherapySession.findByIdAndUpdate(sessionId, {
+                    $push: { chat_sessions: newMsg._id },
+                });
+
+                const newEmotion = await ExtractedEmotion.create({
+                    session_id: sessionId,
+                    extracted_emotion: emotion_extracted,
+                    uploaded_data_type: "video",
+                    file_paths: outputPath,
+                });
+
+                // Update TherapySession to include this emotion
+                await TherapySession.findByIdAndUpdate(sessionId, {
+                    $push: { emotion_records: newEmotion._id },
+                });
 
                 res.send({ messages });
             } catch (err) {

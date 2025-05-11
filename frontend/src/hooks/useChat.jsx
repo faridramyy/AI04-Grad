@@ -23,7 +23,19 @@ export const ChatProvider = ({ children }) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ message }),
+        credentials: "include",
       });
+
+      if (data.status === 400) {
+        const errorRes = await data.json();
+        toast.error(errorRes.error || "Bad request: Please try again.");
+        return;
+      }
+
+      if (!data.ok) {
+        throw new Error("Unexpected error occurred");
+      }
+
       const resp = (await data.json()).messages;
       setMessages((messages) => [...messages, ...resp]);
     } catch (error) {
@@ -46,6 +58,8 @@ export const ChatProvider = ({ children }) => {
       const response = await fetch(`${BACKEND_URL}/api/therapy-reply/audio`, {
         method: "POST",
         body: formData,
+        credentials: "include",
+
       });
 
       const data = await response.json();
@@ -79,6 +93,7 @@ export const ChatProvider = ({ children }) => {
       const response = await fetch(`${BACKEND_URL}/api/therapy-reply/video`, {
         method: "POST",
         body: formData,
+        credentials: "include",
       });
 
       const data = await response.json();
