@@ -111,7 +111,7 @@ export default function Navigation() {
               </div>
             </div>
             <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-cyan-500">
-              MindfulAI
+              RINA.AI
             </h1>
           </Link>
 

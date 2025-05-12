@@ -12,6 +12,10 @@
   height: 100vh;
 }
 
+body {
+  overflow-x: hidden;
+}
+
 /* Hide scrollbar but keep scroll functionality */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
