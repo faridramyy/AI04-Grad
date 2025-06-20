@@ -513,3 +513,50 @@ export const getAllSessionsEmotionDistribution = async(req, res) => {
         return res.status(500).json({ error: err.message });
     }
 };
+export const getRecentChatHistory = async (req, res) => {
+  try {
+    // 1) Auth
+    const token = req.cookies.token;
+    if (!token) return res.status(401).json({ error: "Unauthorized." });
+    const { userId } = jwt.verify(token, process.env.JWT_SECRET);
+
+    // 2) Get active session
+    const sessionId = req.cookies.activeSessionId;
+    if (!sessionId) {
+      return res.status(400).json({ error: "No active session cookie set." });
+    }
+
+    // 3) Load last 5 AI_Message docs via populate
+    const session = await TherapySession.findById(sessionId)
+      .populate({
+        path: "chat_sessions",
+        options: { sort: { date: -1 }, limit: 5 },
+        select: "message_text response",
+      });
+
+    if (!session) {
+      return res.status(404).json({ error: "Therapy session not found." });
+    }
+    if (session.patient_id.toString() !== userId) {
+      return res.status(403).json({ error: "Forbidden: not your session." });
+    }
+
+    // 4) Build history
+    const chats = session.chat_sessions;
+    if (chats.length === 0) {
+      return res.json({
+        history: [{ text: "No previous messages before this one." }],
+      });
+    }
+
+    // Return both sides of each exchange:
+    const history = chats.map((msg) => ({
+      userMessage: msg.message_text,
+      aiResponse:  msg.response,
+    }));
+
+    return res.json({ history });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
